@@ -20,6 +20,9 @@ const usage = `Usage of httpcustomhouse:
   -h, --help prints help information 
 `
 
+// /!\ request contain \r\n\r\n characters, when editing w/ vscode for example this character are
+// automatically deleted. Use echo -ne "0\r\n\r\n" instead
+
 func main() {
 	//-r
 	var residue bool
@@ -62,7 +65,7 @@ func main() {
 		if sTransferEncoding == "chunked" {
 			// TODO: implement real chunked encoding
 			// read body till 0
-			endChunk := strings.Index(string(bodyB), "0\r\n\r\n") //0\r\n\r\n
+			endChunk := strings.Index(string(bodyB), "0\r\n\r\n")
 			if endChunk == -1 {
 				log.Fatal("Failed to retrieve end of chunks in request('0\\r\\n\\r\\n')")
 			}
