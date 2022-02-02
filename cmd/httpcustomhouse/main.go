@@ -32,7 +32,7 @@ func main() {
 	//-te
 	var isTE bool
 	flag.BoolVar(&isTE, "Transfer-Encoding", false, "stop request treatment according to chunked encoding")
-	flag.BoolVar(&residue, "te", false, "stop request treatment according to chunked encoding")
+	flag.BoolVar(&isTE, "te", false, "stop request treatment according to chunked encoding")
 	flag.Usage = func() { fmt.Print(usage) }
 	flag.Parse()
 
@@ -61,15 +61,16 @@ func main() {
 		sTransferEncoding := httpHeader.Get("Transfer-encoding")
 		if sTransferEncoding == "chunked" {
 			// read body till 0
-			endChunk := strings.Index(string(bodyB), "\n0\n")
+			endChunk := strings.Index(string(bodyB), "0\n\n") //0\r\n\r\n ---> 0\n\n
 			if endChunk == -1 {
-				log.Fatal("Failed to retrieve end of chunks in request('\\n0\\n')")
+				log.Fatal("Failed to retrieve end of chunks in request('0\\r\\n\\r\\n')")
 			}
-			bodyTE := string(bodyB[:endChunk+3]) //+3: take into account \n0\n as EndChunk return the index of the substring beginning
+			bodyTE := string(bodyB[:endChunk+4]) //+4: take into account 0\r\n\r\n as EndChunk return the index of the substring beginning
+			// 0\n\n + 1 =3 + 1 = 4  .. Why 1 ?
 			fmt.Printf(bodyTE)
 
-			if residue && len(bodyB) >= endChunk+3 {
-				bodyEnding := string(bodyB[endChunk+3:])
+			if residue && len(bodyB) >= endChunk+4 {
+				bodyEnding := string(bodyB[endChunk+4:])
 				fmt.Fprintf(os.Stderr, utils.Purple(bodyEnding))
 			}
 		} else {
@@ -87,12 +88,12 @@ func main() {
 		}
 
 		// Print request body  as it would be interpreted by server using Content-Length
-		bodyCL := string(bodyB[:contentLength-1]) // -1 due to the \n beginning the body form (see above)
+		bodyCL := string(bodyB[:contentLength+1]) // -1? due to the \n beginning the body form (see above)
 		fmt.Printf(bodyCL)
 
 		// Print request residue
-		if residue && len(bodyB) >= contentLength {
-			bodyResidue := string(bodyB[contentLength-1:])
+		if residue && len(bodyB) >= contentLength+1 {
+			bodyResidue := string(bodyB[contentLength+1:])
 			fmt.Fprintf(os.Stderr, utils.Purple(bodyResidue))
 		}
 	}
