@@ -16,9 +16,10 @@ cat samples/cl.te | httpcustomhouse -cl
 cat samples/cl.te | httpcustomhouse -te
 ```
 
-**Show the residue of the request that has not been treated** (in stderr)
+**Show the residue of the request that has not been treated** (in stderr):
 ```shell
-cat samples/cl.te | httpcustomhouse -te -r  # -r (or --residue) works also for -cl
+cat samples/cl.te | httpcustomhouse -te -r
+# -r (or --residue) works also for -cl
 ```
 
 ## Why ?
