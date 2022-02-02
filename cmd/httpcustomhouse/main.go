@@ -52,7 +52,7 @@ func main() {
 
 	// Print header
 	for h, v := range httpHeader {
-		fmt.Printf("%s: %s\n", h, v[0]) //TO DO handle where multiple value are found for a specific header
+		fmt.Printf("%s: %s\n", h, v[0]) //TODO handle where multiple value are found for a specific header
 	}
 
 	if isTE { //TE custom house
@@ -60,17 +60,18 @@ func main() {
 		// Get Body with Transfer-Encoding
 		sTransferEncoding := httpHeader.Get("Transfer-encoding")
 		if sTransferEncoding == "chunked" {
+			// TODO: implement real chunked encoding
 			// read body till 0
-			endChunk := strings.Index(string(bodyB), "0\n\n") //0\r\n\r\n ---> 0\n\n
+			endChunk := strings.Index(string(bodyB), "0\r\n\r\n") //0\r\n\r\n
 			if endChunk == -1 {
 				log.Fatal("Failed to retrieve end of chunks in request('0\\r\\n\\r\\n')")
 			}
-			bodyTE := string(bodyB[:endChunk+4]) //+4: take into account 0\r\n\r\n as EndChunk return the index of the substring beginning
-			// 0\n\n + 1 =3 + 1 = 4  .. Why 1 ?
+			bodyTE := string(bodyB[:endChunk+5]) //+5: take into account 0\r\n\r\n as EndChunk return the index of the substring beginning
+			// 0\r\n\r\n + 1 = 5  .. Why 1 ?
 			fmt.Printf(bodyTE)
 
-			if residue && len(bodyB) >= endChunk+4 {
-				bodyEnding := string(bodyB[endChunk+4:])
+			if residue && len(bodyB) >= endChunk+5 {
+				bodyEnding := string(bodyB[endChunk+5:])
 				fmt.Fprintf(os.Stderr, utils.Purple(bodyEnding))
 			}
 		} else {
