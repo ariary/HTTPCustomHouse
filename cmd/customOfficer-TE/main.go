@@ -1,87 +1,47 @@
 package main
 
 import (
+	"HTTPCustomHouse/pkg/parser"
+	"HTTPCustomHouse/pkg/utils"
 	"bufio"
+	"flag"
 	"fmt"
-	"io"
 	"log"
-	"net/http"
-	"net/textproto"
 	"os"
 	"strings"
 )
 
-//UTILS
-
-var (
-	Info = Teal
-	Warn = Yellow
-	Evil = Red
-	Good = Green
-	Code = Cyan
-)
-
-var (
-	Black         = Color("\033[1;30m%s\033[0m")
-	Red           = Color("\033[1;31m%s\033[0m")
-	Green         = Color("\033[1;32m%s\033[0m")
-	Yellow        = Color("\033[1;33m%s\033[0m")
-	Purple        = Color("\033[1;34m%s\033[0m")
-	Magenta       = Color("\033[1;35m%s\033[0m")
-	Teal          = Color("\033[1;36m%s\033[0m")
-	White         = Color("\033[1;37m%s\033[0m")
-	Cyan          = Color("\033[1;96m%s\033[0m")
-	Underlined    = Color("\033[4m%s\033[24m")
-	Bold          = Color("\033[1m%s\033[0m")
-	Italic        = Color("\033[3m%s\033[0m")
-	RedForeground = Color("\033[1;41m%s\033[0m")
-)
-
-func Color(colorString string) func(...interface{}) string {
-	sprint := func(args ...interface{}) string {
-		return fmt.Sprintf(colorString,
-			fmt.Sprint(args...))
-	}
-	return sprint
-}
-
-const usage = `Usage of customOfficer:
+const usage = `Usage of customOfficer-TE:
   -r, --residues display residues of the request not treated by the custom officer
   -h, --help prints help information 
 `
 
 func main() {
 
+	var residue bool
+	flag.BoolVar(&residue, "residue", false, "display residue of the request not treated by the custom officer")
+	flag.BoolVar(&residue, "r", false, "display residue of the request not treated by the custom officer")
+	flag.Usage = func() { fmt.Print(usage) }
+	flag.Parse()
+
 	in := bufio.NewReader(os.Stdin)
-	//request, err := http.ReadRequest(in)
+	//request, err := http.ReadRequest(in)	//we have to rewrite the method by our own as it process CL check and TE also => err
 	reader := bufio.NewReader(in)
-	tp := textproto.NewReader(reader)
 
-	// First line: POST /index.html HTTP/1.0 or other
-	var s string
-	var err error
-	if s, err = tp.ReadLine(); err != nil {
-		fmt.Println("ReadLine", err)
-	}
-	fmt.Println(s) //TO DO: check if this a POST request and with HTTP 1.1
-
-	mimeHeader, err := tp.ReadMIMEHeader()
+	httpHeader, bodyB, err := parser.ParseRequest(reader)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Failed parsing request:", err)
 	}
-	// http.Header and textproto.MIMEHeader are both just a map[string][]string
-	httpHeader := http.Header(mimeHeader)
-	// print header
+
+	// Print header
 	for h, v := range httpHeader {
 		fmt.Printf("%s: %s\n", h, v[0]) //TO DO handle where multiple value are found for a specific header
 	}
 
 	// Get Body with Transfer-Encoding
-	bodyB, _ := io.ReadAll(tp.R)           // get body
-	bodyB = append([]byte("\n"), bodyB...) //\n of REQUEST is not counted in body => add it
 	sTransferEncoding := httpHeader.Get("Transfer-encoding")
 	if sTransferEncoding == "chunked" {
-		//read body till 0
+		// read body till 0
 		endChunk := strings.Index(string(bodyB), "\n0\n")
 		if endChunk == -1 {
 			log.Fatal("Failed to retrieve end of chunks in request('\\n0\\n')")
@@ -91,7 +51,7 @@ func main() {
 
 		if len(bodyB) >= endChunk+3 {
 			bodyEnding := string(bodyB[endChunk+3:])
-			fmt.Fprintf(os.Stderr, Purple(bodyEnding))
+			fmt.Fprintf(os.Stderr, utils.Purple(bodyEnding))
 		}
 	} else {
 		fmt.Print(string(bodyB))
