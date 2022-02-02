@@ -16,9 +16,9 @@ cat samples/cl.te | httpcustomhouse -cl
 cat samples/cl.te | httpcustomhouse -te
 ```
 
-By adding the flag `-r` (or `--residue`) you can see **the residue of the request that has not been treated** (in stderr). For example, to see the part of my request that hasn't been treated by a server using chunked encoding:
+**Show the residue of the request that has not been treated** (in stderr) by adding the flag `-r` (or `--residue`) you can see:
 ```shell
-cat samples/cl.te | httpcustomhouse -te -r
+cat samples/cl.te | httpcustomhouse -te -r  #work also for -cl
 ```
 
 ## Why ?
