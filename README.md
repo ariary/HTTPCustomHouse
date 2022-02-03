@@ -80,7 +80,7 @@ cat request | httpcustomhouse -te | httpcustomhouse -cl -r
 
 ## Building request
 
-As `httpcustomhouse` use raw HTTP request as input you need to be able to construct them. There are several ways:
+As `httpcustomhouse` use raw HTTP request as input you need to be able to construct it. There are several ways:
 * Intercept request with `burp`, `mitmproxy` and save it to a file
 * [Use curl and an HTTP `echo-server` to see sending request and save it to a file](#use-echo-server)
 * Take inspiration from the templates present in `samples` directory
