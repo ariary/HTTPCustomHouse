@@ -84,22 +84,25 @@ func main() {
 		// Get Content-Length value
 		sContentLength := httpHeader.Get("Content-Length")
 		if sContentLength == "" {
-			fmt.Fprintf(os.Stderr, "Content-Length not found")
-		}
-		contentLength, err := strconv.Atoi(sContentLength)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Failed to convert Content-Length: %s", err)
+			//fmt.Fprintf(os.Stderr, "Content-Length not found")
+			fmt.Print(string(bodyB)) //Print whole request
+		} else {
+			contentLength, err := strconv.Atoi(sContentLength)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Failed to convert Content-Length: %s", err)
+			}
+
+			// Print request body  as it would be interpreted by server using Content-Length
+			bodyCL := string(bodyB[:contentLength+1]) // -1? due to the \n beginning the body form (see above)
+			fmt.Printf(bodyCL)
+
+			// Print request residue
+			if residue && len(bodyB) >= contentLength+1 {
+				bodyResidue := string(bodyB[contentLength+1:])
+				fmt.Fprintf(os.Stderr, utils.Purple(bodyResidue))
+			}
 		}
 
-		// Print request body  as it would be interpreted by server using Content-Length
-		bodyCL := string(bodyB[:contentLength+1]) // -1? due to the \n beginning the body form (see above)
-		fmt.Printf(bodyCL)
-
-		// Print request residue
-		if residue && len(bodyB) >= contentLength+1 {
-			bodyResidue := string(bodyB[contentLength+1:])
-			fmt.Fprintf(os.Stderr, utils.Purple(bodyResidue))
-		}
 	}
 
 }
