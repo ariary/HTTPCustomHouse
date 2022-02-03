@@ -150,7 +150,7 @@ rm data
 
 ```
 
-## Send Crafted HTTP request
+## Send raw HTTP request
 
 When you request is good, send it:
 ```Shell
