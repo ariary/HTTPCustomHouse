@@ -133,7 +133,6 @@ The one-liner:
 ```shell
 nc -lp 8888 -c "tee myfile"
 ## or nc -nlvp 8888 > myfile  2>/dev/null &
-
 ```
 
 #### Example
@@ -149,6 +148,19 @@ nc -lp 8888 -c "tee diff-te.cl" #use another shell to make curl request
 curl -X POST --proxy http://localhost:8888/  vulnerable-website.com --data-binary "@data" -H 'transfer-encoding:chunked' -H 'Content-Length: 4'
 rm data
 
+```
+
+## Send Crafted HTTP request
+
+When you request is good, send it:
+```Shell
+cat [raw_request] | openssl s_client -ign_eof t -connect [target_url]:443
+```
+
+Or if the target does not use tls/ssl:
+
+```Shell
+cat [raw_request] | nc -q 5 [target_url] 80 # or -w 5
 ```
 
 ## Install
