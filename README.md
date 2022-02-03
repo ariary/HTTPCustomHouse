@@ -105,6 +105,7 @@ As `httpcustomhouse` use raw HTTP request as input you need to be able to constr
 ### Use echo server
 
 **First**, set up an echo server:
+* Use **[mine](https://github.com/ariary/httpecho)** (compatible with request smuggling research)
 * with `socat`
 * with `netcat`
 * Build your own
