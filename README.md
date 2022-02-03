@@ -2,6 +2,21 @@
 
 Simple offline simulation of server behavior helping to forge  HTTP smuggling attack
 
+<div align=center>
+<table>
+    <thead>
+        <tr>
+          <th colspan="2">⬇️ <code>TE.CL</code> example</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><img src=https://github.com/ariary/HTTPCustomHouse/blob/main/img/hch.png></td>
+        </tr>
+    </tbody>
+</table>
+</div>  
+  
 ## Usage
 
 `httpcustomhouse` takes as input a raw HTTP request.
