@@ -78,7 +78,7 @@ cat request | httpcustomhouse -te | httpcustomhouse -cl -r
 ## TRICK: add 2>&1 >/dev/null at the end to only obtain the non-treated part
 ```
 
-## Building request
+## Building HTTP request
 
 As `httpcustomhouse` use raw HTTP request as input you need to be able to construct it. There are several ways:
 * Intercept request with `burp`, `mitmproxy` and save it to a file
