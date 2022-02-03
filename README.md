@@ -122,15 +122,15 @@ nc -lp 8888 -c "tee myfile"
 
 #### Example
 
-To build `samples/diff-te.cl`:
+~ To build `samples/diff-te.cl`:
 ```shell
 ## Construct embedded request
-nc -lp 8888 -c "tee data"
-curl -X GET --proxy http://localhost:8888/  vulnerable-website.com -H 'Content-Length: 144'
+nc -lp 8888 -c "tee data" #use another shell to make curl request
+curl -X GET --proxy http://localhost:8888/  vulnerable-website.com -H 'Content-Length: 144' -H 'Content-Type: application/x-www-form-urlencoded'
 
 ## Construct the whole request
-nc -lp 8888 -c "tee diff-te.cl"
-curl -X POST --proxy http://localhost:8888/  vulnerable-website.com --data "@path_of_file" -H 'transfer-encoding:chunked' -H 'Content-Length: 4'
+nc -lp 8888 -c "tee diff-te.cl" #use another shell to make curl request
+curl -X POST --proxy http://localhost:8888/  vulnerable-website.com --data-binary "@data" -H 'transfer-encoding:chunked' -H 'Content-Length: 4'
 rm data
 
 ```
