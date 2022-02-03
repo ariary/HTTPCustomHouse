@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 
-	"HTTPCustomHouse/pkg/parser"
-	"HTTPCustomHouse/pkg/utils"
+	"github.com/ariary/HTTPCustomHouse/pkg/parser"
+	"github.com/ariary/HTTPCustomHouse/pkg/utils"
 )
 
 const usage = `Usage of httpcustomhouse:
