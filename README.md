@@ -4,7 +4,7 @@ Simple offline simulation of server behavior helping to forge  HTTP smuggling at
 
 ## Usage
 
-`httpcustomhouse` takes as input an HTTP request.
+`httpcustomhouse` takes as input a raw HTTP request.
 
 **Show corresponding request treated by a server based on `Content-Length` Header**:  
 ```shell
