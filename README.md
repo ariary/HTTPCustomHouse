@@ -26,7 +26,7 @@ Simple offline simulation of server behavior helping to forge  HTTP smuggling at
 cat samples/te.cl | httpcustomhouse -cl
 ```
 
-**Show corresponding request treated by a server based on chunked encoding**:
+**Show corresponding request treated by a server based on chunk encoding**:
 ```shell
 cat samples/cl.te | httpcustomhouse -te
 ```
