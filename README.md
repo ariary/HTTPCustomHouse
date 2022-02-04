@@ -40,6 +40,7 @@ cat samples/cl.te | httpcustomhouse -te -r
 * [Forge `TE.CL` request smuggling attack](#analyze-tecl-request-treatment)
 * [Forge `CL.TE` request smuggling attack](#analyze-clte-request-treatment)
 * [How to build raw HTTP request?](#building-http-request)
+* [How to send raw HTTP request?](#send-raw-http-request)
 
 ## Why ?
 
