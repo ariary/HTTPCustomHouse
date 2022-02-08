@@ -92,15 +92,24 @@ func main() {
 				fmt.Fprintf(os.Stderr, "Failed to convert Content-Length: %s", err)
 			}
 
-			// Print request body  as it would be interpreted by server using Content-Length
-			bodyCL := string(bodyB[:contentLength+1]) // -1? due to the \n beginning the body form (see above)
-			fmt.Printf(bodyCL)
+			// 3 cases: CL = body length, CL > body length, CL < body length
+			difference := contentLength - len(bodyB)
+			switch {
+			case difference > 0: // print body + nb of bytes missing
+				fmt.Printf(string(bodyB))
+				fmt.Fprintln(os.Stderr, utils.Yellow("\nMissing ", difference, " bytes in body"))
+			case difference <= 0: //print body + extra body payload (if there is)
+				// Print request body  as it would be interpreted by server using Content-Length
+				bodyCL := string(bodyB[:contentLength+1]) // -1? due to the \n beginning the body form (see above)
+				fmt.Printf(bodyCL)
 
-			// Print request residue
-			if residue && len(bodyB) >= contentLength+1 {
-				bodyResidue := string(bodyB[contentLength+1:])
-				fmt.Fprintf(os.Stderr, utils.Purple(bodyResidue))
+				// Print request residue
+				if residue && len(bodyB) >= contentLength+1 {
+					bodyResidue := string(bodyB[contentLength+1:])
+					fmt.Fprintf(os.Stderr, utils.Purple(bodyResidue))
+				}
 			}
+
 		}
 
 	}
