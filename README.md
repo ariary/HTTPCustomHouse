@@ -156,6 +156,8 @@ rm data
 When you request is good, send it:
 ```Shell
 cat [raw_request] | openssl s_client -ign_eof -connect [target_url]:443
+#or use ncat from nmap package
+cat [raw_request]| ncat --ssl [target_url] 443
 ```
 
 Or if the target does not use tls/ssl:
