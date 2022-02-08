@@ -7,10 +7,8 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"strings"
 
 	"github.com/ariary/HTTPCustomHouse/pkg/parser"
-	"github.com/ariary/HTTPCustomHouse/pkg/utils"
 )
 
 const usage = `Usage of httpcustomhouse:
@@ -63,20 +61,7 @@ func main() {
 		// Get Body with Transfer-Encoding
 		sTransferEncoding := httpHeader.Get("Transfer-encoding")
 		if sTransferEncoding == "chunked" {
-			// TODO: implement real chunked encoding
-			// read body till 0
-			endChunk := strings.Index(string(bodyB), "0\r\n\r\n")
-			if endChunk == -1 {
-				log.Fatal("Failed to retrieve end of chunks in request('0\\r\\n\\r\\n')")
-			}
-			bodyTE := string(bodyB[:endChunk+5]) //+5: take into account 0\r\n\r\n as EndChunk return the index of the substring beginning
-			// 0\r\n\r\n + 1 = 5  .. Why 1 ?
-			fmt.Printf(bodyTE)
-
-			if residue && len(bodyB) >= endChunk+5 {
-				bodyEnding := string(bodyB[endChunk+5:])
-				fmt.Fprintf(os.Stderr, utils.Purple(bodyEnding))
-			}
+			parser.FilterWithChunkEncoding(bodyB, residue)
 		} else {
 			fmt.Print(string(bodyB))
 		}
@@ -91,24 +76,7 @@ func main() {
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Failed to convert Content-Length: %s", err)
 			}
-
-			// 3 cases: CL = body length, CL > body length, CL < body length
-			difference := contentLength - len(bodyB)
-			switch {
-			case difference > 0: // print body + nb of bytes missing
-				fmt.Printf(string(bodyB))
-				fmt.Fprintln(os.Stderr, utils.Yellow("\nMissing ", difference, " bytes in body"))
-			case difference <= 0: //print body + extra body payload (if there is)
-				// Print request body  as it would be interpreted by server using Content-Length
-				bodyCL := string(bodyB[:contentLength+1]) // -1? due to the \n beginning the body form (see above)
-				fmt.Printf(bodyCL)
-
-				// Print request residue
-				if residue && len(bodyB) >= contentLength+1 {
-					bodyResidue := string(bodyB[contentLength+1:])
-					fmt.Fprintf(os.Stderr, utils.Purple(bodyResidue))
-				}
-			}
+			parser.FilterWithContentLength(contentLength, bodyB, residue)
 
 		}
 
