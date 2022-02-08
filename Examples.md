@@ -3,7 +3,15 @@
 
 The aim is to perform request smuggling from command line. The aim is not to totally replace Burp Suite but to propose another approach., with more CLi.
 
-The following examples are an alternative to PortSwigger Burp solutions provided for the PortSwigger Burp academy
+The following examples are an alternative to PortSwigger Burp solutions provided for the PortSwigger Burp academy. They use:
+* [`httpcustomhouse`](https://github.com/ariary/HTTPCustomHouse): to simulate server behavior regarding `Content-Length` and chunk encoding
+* [`httpoverride`](https://github.com/ariary/HTTPCustomHouse): to change headers of raw request for people not at ease with `sed` 
+* [`httpecho`](https://github.com/ariary/httpecho): HTTP echo server echoing request exactly as it is received
+
+Also to reproduce steps, Export an env var for the lab endpoint:
+```shell
+export LAB_URL=[YOUR_LAB_URL]
+```
 
 ## [Exploiting HTTP request smuggling to reveal front-end request rewriting](https://portswigger.net/web-security/request-smuggling/exploiting/lab-reveal-front-end-request-rewriting)
 
@@ -14,13 +22,9 @@ We also know that:
 * The front-end server adds an HTTP header to incoming requests containing their IP address. We have to find its name
 * The front-end does not support chunk encoding
 
-Export an envvar for your lab endpoint:
-```shell
-export LAB_URL=[YOUR_LAB_URL]
-```
 
 ### I - Find a POST parameter that is reflected in response
-use [`arjun`](https://github.com/s0md3v/Arjun):
+use [`arjun`](https://github.com/s0md3v/Arjun), a tool to detect parameters for URL:
 ```shell
 arjun -u $LAB_URL
 [...]
