@@ -155,6 +155,17 @@ rm data
 
 ## Send raw HTTP request
 
+`httpclient` is the equivalent of **`curl` for raw request**.
+
+**Why?**
+* `curl` & go http client rewrite http request
+* `ncat` and `openssl s_client` aren't fulle satisfying
+
+```shell
+cat [raw_request] | ./httpclient https://[URL]:[PORT]
+```
+
+### Alternatives
 When you request is good, send it:
 ```Shell
 cat [raw_request] | openssl s_client -ign_eof -connect [target_url]:443
