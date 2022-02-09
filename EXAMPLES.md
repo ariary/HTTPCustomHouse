@@ -80,5 +80,5 @@ curl -s -X POST http://localhost:8888/ --data-binary "@payload" -H "Host: $LAB_U
 
 Send the request:
 ```shell
-cat smuggle| ncat --ssl $LAB_URL 443
+cat smuggle | ./httpclient https://$LAB_URL
 ```
