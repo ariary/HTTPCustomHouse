@@ -162,7 +162,7 @@ rm data
 * `ncat` and `openssl s_client` aren't fulle satisfying
 
 ```shell
-cat [raw_request] | ./httpclient https://[URL]:[PORT]
+cat [raw_request] | httpclient https://[URL]:[PORT]
 ```
 
 ### Alternatives
