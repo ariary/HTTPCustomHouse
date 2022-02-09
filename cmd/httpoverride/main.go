@@ -11,10 +11,11 @@ import (
 )
 
 const usage = `Usage of httpoverride:
-  -H, --header headers to modify
-  -v, --value header value
-  -A, --add add header even if it already exists
-  -h, --help prints help information 
+  -H, --header  headers to modify
+  -v, --value   header value
+  -d, --delete  delete header
+  -A, --add     add header even if it already exists
+  -h, --help    prints help information 
 `
 
 // /!\ request contain \r\n\r\n characters, when editing w/ vscode for example this character are
@@ -29,15 +30,24 @@ func main() {
 	var value string
 	flag.StringVar(&value, "value", "", "header value")
 	flag.StringVar(&value, "v", "", "header value")
-	//-te
+	//-d
+	var del bool
+	flag.BoolVar(&del, "d", false, "delete header")
+	flag.BoolVar(&del, "delete", false, "delete header")
+	//-A
 	var add bool
 	flag.BoolVar(&add, "A", false, "add header even if it already exists")
 	flag.BoolVar(&add, "add", false, "add header even if it already exists")
 	flag.Usage = func() { fmt.Print(usage) }
 	flag.Parse()
 
-	if value == "" {
+	if value == "" && !del {
 		fmt.Fprintf(os.Stderr, "Please define a value for header with -v flag")
+		os.Exit(1)
+	}
+
+	if del && (value != "" || add) {
+		fmt.Fprintf(os.Stderr, "-d flag can't be used with -A or -v")
 		os.Exit(1)
 	}
 
@@ -52,6 +62,8 @@ func main() {
 	// Modify Header
 	if add {
 		httpHeader[header] = append(httpHeader[header], value)
+	} else if del {
+		delete(httpHeader, header)
 	} else {
 		httpHeader[header] = []string{value}
 	}
