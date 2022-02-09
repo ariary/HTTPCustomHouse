@@ -13,6 +13,7 @@ import (
 	"github.com/ariary/HTTPCustomHouse/pkg/utils"
 )
 
+//Parse a request to retrieve headers and body
 func ParseRequest(reader *bufio.Reader) (httpHeader http.Header, bodyB []byte, err error) {
 	tp := textproto.NewReader(reader)
 
@@ -25,7 +26,7 @@ func ParseRequest(reader *bufio.Reader) (httpHeader http.Header, bodyB []byte, e
 	fmt.Println(s) //TO DO: check if this a POST request and with HTTP 1.1
 
 	mimeHeader, err := tp.ReadMIMEHeader()
-	if err != nil {
+	if err != nil && err != io.EOF {
 		return nil, nil, err
 	}
 	// http.Header and textproto.MIMEHeader are both just a map[string][]string
@@ -39,6 +40,35 @@ func ParseRequest(reader *bufio.Reader) (httpHeader http.Header, bodyB []byte, e
 	bodyB = append([]byte("\n"), bodyB...)
 
 	return httpHeader, bodyB, err
+}
+
+//Parse a request to retrieve headers and body but do not print any information
+func ParseRequestWithoutPrint(reader *bufio.Reader) (method string, httpHeader http.Header, bodyB []byte, err error) {
+	tp := textproto.NewReader(reader)
+
+	// First line: POST /index.html HTTP/1.0 or other
+	var s string
+
+	if s, err = tp.ReadLine(); err != nil {
+		log.Fatal(err)
+	}
+	method = strings.Split(s, " ")[0] //if error => Wrong raw packet
+
+	mimeHeader, err := tp.ReadMIMEHeader()
+	if err != nil && err != io.EOF {
+		return method, nil, nil, err
+	}
+	// http.Header and textproto.MIMEHeader are both just a map[string][]string
+	httpHeader = http.Header(mimeHeader)
+
+	//Get body
+	bodyB, err = io.ReadAll(tp.R)
+	if err != nil {
+		return method, nil, nil, err
+	}
+	bodyB = append([]byte("\n"), bodyB...)
+
+	return method, httpHeader, bodyB, err
 }
 
 //Parse the body according to chunk encoding
