@@ -11,6 +11,7 @@ The following examples are an alternative to PortSwigger Burp solutions provided
 * [`httpcustomhouse`](https://github.com/ariary/HTTPCustomHouse): to simulate server behavior regarding `Content-Length` and chunk encoding
 * [`httpoverride`](https://github.com/ariary/HTTPCustomHouse): to change headers of raw request for people not at ease with `sed` 
 * [`httpecho`](https://github.com/ariary/httpecho): HTTP echo server echoing request exactly as it is received
+* [`httpclient`](https://github.com/ariary/HTTPCustomHouse): `curl` for raw packet because curl, golang http client rewrite packet and `ncat` or `openssl s_client` aren't satisfying
 
 Also to reproduce steps, Export an env var for the lab endpoint:
 ```shell
