@@ -16,6 +16,7 @@ import (
 const usage = `Usage of httpclient: httpclient [url]
 Make http request from raw request. [url] is required and on the form: [protocol]://[addr]:[port]
   -k, --insecure     insecure HTTPS communication
+  -v, --verbose		 display request sent
   -h, --help         prints help information 
 `
 
@@ -27,6 +28,10 @@ func main() {
 	var insecure bool
 	flag.BoolVar(&insecure, "insecure", false, "Insecure HTTPS communication")
 	flag.BoolVar(&insecure, "k", false, "Insecure HTTPS communication")
+
+	var verbose bool
+	flag.BoolVar(&verbose, "verbose", false, "Display request sent")
+	flag.BoolVar(&verbose, "v", false, "Display request sent")
 	flag.Usage = func() { fmt.Print(usage) }
 	flag.Parse()
 
@@ -41,6 +46,11 @@ func main() {
 	req, err := ioutil.ReadAll(os.Stdin)
 	if err != nil {
 		log.Fatal(err)
+	}
+	if verbose {
+		fmt.Println("--------------------- SEND:")
+		fmt.Println(string(req))
+		fmt.Println("--------------------- RECEIVE:")
 	}
 
 	var conn net.Conn

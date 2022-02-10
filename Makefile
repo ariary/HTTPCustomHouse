@@ -6,3 +6,6 @@ build.httpcustomhouse:
 
 build.httpoverride:
 	@echo "build in ${PWD}";go build -o httpoverride cmd/httpoverride/main.go
+
+build.httpclient:
+	@echo "build in ${PWD}";go build -o httpclient cmd/httpclient/main.go
