@@ -21,6 +21,11 @@ const usage = `Usage of httpoverride:
 // /!\ request contain \r\n\r\n characters, when editing w/ vscode for example this character are
 // automatically deleted. Use echo -ne "0\r\n\r\n" instead
 
+//Http spec: \r\n at each end of line
+//HEADER
+//\r\n
+//BODY
+
 func main() {
 	//-H
 	var header string
@@ -67,13 +72,27 @@ func main() {
 	} else {
 		httpHeader[header] = []string{value}
 	}
+	// Print header
+	// always print Host first
+	//print 1 of them, delete it and continue
+	hosts := httpHeader["Host"]
+	if len(hosts) != 0 {
+		fmt.Printf("Host: %s\r\n", hosts[0])
+	}
+
+	if len(hosts) > 1 { //plenty Host headers
+		httpHeader["Host"] = hosts[1:]
+	} else { // only one so remove it from headers as it has already been printed
+		delete(httpHeader, "Host")
+	}
+
 	for h, values := range httpHeader {
 		for i := 0; i < len(values); i++ {
-			fmt.Printf("%s: %s\n", h, values[i])
+			fmt.Printf("%s: %s\r\n", h, values[i])
 		}
 	}
 
-	//print body
-	fmt.Print(string(bodyB))
+	//print body ("\r\n" is already in bodyB)
+	fmt.Printf(string(bodyB))
 
 }

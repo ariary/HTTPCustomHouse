@@ -23,7 +23,8 @@ func ParseRequest(reader *bufio.Reader) (httpHeader http.Header, bodyB []byte, e
 	if s, err = tp.ReadLine(); err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(s) //TO DO: check if this a POST request and with HTTP 1.1
+	//fmt.Println(s) //TO DO: check if this a POST request and with HTTP 1.1
+	fmt.Printf("%s\r\n", s) //TO DO: check if this a POST request and with HTTP 1.1
 
 	mimeHeader, err := tp.ReadMIMEHeader()
 	if err != nil && err != io.EOF {
@@ -37,7 +38,7 @@ func ParseRequest(reader *bufio.Reader) (httpHeader http.Header, bodyB []byte, e
 	if err != nil {
 		return nil, nil, err
 	}
-	bodyB = append([]byte("\n"), bodyB...)
+	bodyB = append([]byte("\r\n"), bodyB...)
 
 	return httpHeader, bodyB, err
 }
