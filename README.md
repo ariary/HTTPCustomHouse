@@ -11,7 +11,7 @@
 
 <b>httpclient</b> <strong>•</strong>  send raw HTTP request
 
-TE.CL</code> example <a href=https://github.com/ariary/HTTPCustomHouse/blob/main/img/hch.png>[🖼️]</a>
+<code>TE.CL</code> example <a href=https://github.com/ariary/HTTPCustomHouse/blob/main/img/hch.png> (🖼️)</a> <strong>•</strong> exploit <code>CL.TE</code><a href=https://github.com/ariary/HTTPCustomHouse/blob/main/EXAMPLES.md#exploiting-http-request-smuggling-to-reveal-front-end-request-rewriting> (📝)</a>  
 <!---<table>
     <thead>
         <tr>
