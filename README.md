@@ -50,7 +50,7 @@ cat samples/cl.te | httpcustomhouse -te -r
 * [How to build raw HTTP request?](#building-http-request)
 * [How to send raw HTTP request?](#send-raw-http-request)
 * [Visualize `TE.CL` (🖼️)](https://github.com/ariary/HTTPCustomHouse/blob/main/img/hch.png)
-* [exploit `CL.TE` (📝)](https://github.com/ariary/HTTPCustomHouse/blob/main/EXAMPLES.md#exploiting-http-request-smuggling-to-reveal-front-end-request-rewriting)  
+* [Exploit `CL.TE` (📝)](https://github.com/ariary/HTTPCustomHouse/blob/main/EXAMPLES.md#exploiting-http-request-smuggling-to-reveal-front-end-request-rewriting)  
 
 ## Why ?
 
