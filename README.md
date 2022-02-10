@@ -5,7 +5,7 @@
 
 <br><strong><i>Simple offline simulation of server behavior helping to forge  HTTP smuggling attack</i></strong>
     
-<b>httpcustomhouse</b> <strong>•</strong> analyze smuggle request  
+<b>httpcustomhouse</b> <strong>•</strong> analyze smuggled request  
     
 <b>httpoverride </b><strong>•</strong>  manipulate raw HTTP request
 
