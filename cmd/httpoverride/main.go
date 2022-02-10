@@ -11,10 +11,13 @@ import (
 )
 
 const usage = `Usage of httpoverride:
-  -H, --header  headers to modify
-  -v, --value   header value
-  -d, --delete  delete header
-  -A, --add     add header even if it already exists
+  -H, --header            headers to modify
+  -v, --value             header value
+  -d, --delete            delete header
+  -A, --add               add header even if it already exists
+  -cl, --content-length   modify Content-Length header
+  -te, --chunked          add chunked encoding header
+  --host                  modify Host header
   -h, --help    prints help information 
 `
 
@@ -31,7 +34,7 @@ func main() {
 	var header string
 	flag.StringVar(&header, "header", "Content-Length", "headers to modify")
 	flag.StringVar(&header, "H", "Content-Length", "headers to modify")
-	//-H
+	//-v
 	var value string
 	flag.StringVar(&value, "value", "", "header value")
 	flag.StringVar(&value, "v", "", "header value")
@@ -43,8 +46,39 @@ func main() {
 	var add bool
 	flag.BoolVar(&add, "A", false, "add header even if it already exists")
 	flag.BoolVar(&add, "add", false, "add header even if it already exists")
+
+	//-cl
+	var contentLength string
+	flag.StringVar(&contentLength, "cl", "", "modify Content Length header value")
+	flag.StringVar(&contentLength, "content-length", "", "modify Content Length header value")
+
+	//--host
+	var host string
+	flag.StringVar(&host, "host", "", "modify Host header value")
+
+	//-te
+	var chunked bool
+	flag.BoolVar(&chunked, "te", false, "add chunked encoding header")
+	flag.BoolVar(&chunked, "chunked", false, "add chunked encoding header")
+
 	flag.Usage = func() { fmt.Print(usage) }
 	flag.Parse()
+
+	//Shortcuts
+	if contentLength != "" {
+		header = "Content-Length"
+		value = contentLength
+	}
+
+	if host != "" {
+		header = "Host"
+		value = host
+	}
+
+	if chunked {
+		header = "Transfer-Encoding"
+		value = "chunked"
+	}
 
 	if value == "" && !del {
 		fmt.Fprintf(os.Stderr, "Please define a value for header with -v flag")
