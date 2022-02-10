@@ -1,15 +1,15 @@
 # HTTPCustomHouse
 
 <div align=center>
-<img src= https://github.com/ariary/HTTPCustomHouse/blob/main/img/E0D8F573-7824-42C1-BF6B-F58E5F14DB0E.png width=150>
+<img src= https://github.com/ariary/HTTPCustomHouse/blob/main/img/E0D8F573-7824-42C1-BF6B-F58E5F14DB0E.png width=180>
 
 <br><strong><i>Simple offline simulation of server behavior helping to forge  HTTP smuggling attack</i></strong>
-    
-<b>httpcustomhouse</b> <strong>•</strong> analyze smuggled request  
-    
-<b>httpoverride </b><strong>•</strong>  manipulate raw HTTP request
 
-<b>httpclient</b> <strong>•</strong>  send raw HTTP request
+
+👁️ <strong>•</strong> 🔨 <strong>•</strong> 📬
+    
+<b>httpcustomhouse</b> <strong>(</strong> analyze smuggled request <strong>)</strong> <strong>•</strong>  <b>httpoverride</b> <strong>(</strong>manipulate raw HTTP request<strong>)</strong> <strong>•</strong> <b>httpclient</b> <strong>(</strong>  send raw HTTP request <strong>)</strong>
+
 
 <!---<table>
     <thead>
