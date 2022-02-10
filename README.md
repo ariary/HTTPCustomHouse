@@ -11,7 +11,6 @@
 
 <b>httpclient</b> <strong>•</strong>  send raw HTTP request
 
-<a href=https://github.com/ariary/HTTPCustomHouse/blob/main/img/hch.png> Visualize <code>TE.CL</code> (🖼️)</a> <strong>•</strong> <a href=https://github.com/ariary/HTTPCustomHouse/blob/main/EXAMPLES.md#exploiting-http-request-smuggling-to-reveal-front-end-request-rewriting>exploit <code>CL.TE</code> (📝)</a>  
 <!---<table>
     <thead>
         <tr>
@@ -50,6 +49,8 @@ cat samples/cl.te | httpcustomhouse -te -r
 * [Forge `CL.TE` request smuggling attack](#analyze-clte-request-treatment)
 * [How to build raw HTTP request?](#building-http-request)
 * [How to send raw HTTP request?](#send-raw-http-request)
+* [Visualize `TE.CL` (🖼️)](https://github.com/ariary/HTTPCustomHouse/blob/main/img/hch.png)
+* [exploit `CL.TE` (📝)](https://github.com/ariary/HTTPCustomHouse/blob/main/EXAMPLES.md#exploiting-http-request-smuggling-to-reveal-front-end-request-rewriting)  
 
 ## Why ?
 
