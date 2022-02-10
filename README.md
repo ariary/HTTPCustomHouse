@@ -3,9 +3,15 @@
 <div align=center>
 <img src= https://github.com/ariary/HTTPCustomHouse/blob/main/img/E0D8F573-7824-42C1-BF6B-F58E5F14DB0E.png width=150>
 
-<strong>Simple offline simulation of server behavior helping to forge  HTTP smuggling attack</strong>
+<br><strong><i>Simple offline simulation of server behavior helping to forge  HTTP smuggling attack</i></strong>
+    
+<b>httpcustomhouse</b> <strong>•</strong> analyze smuggle request  
+    
+<b>httpoverride </b><strong>•</strong>  manipulate raw HTTP request
 
-<table>
+<b>httpclient</b> <strong>•</strong>  send raw HTTP request
+
+<!---<table>
     <thead>
         <tr>
           <th colspan="2">⬇️ <code>TE.CL</code> example</th>
@@ -16,8 +22,8 @@
             <td><img src=https://github.com/ariary/HTTPCustomHouse/blob/main/img/hch.png></td>
         </tr>
     </tbody>
-</table>
-</div>  
+</table>-->
+</div> 
   
 ## Usage
 
@@ -43,8 +49,14 @@ cat samples/cl.te | httpcustomhouse -te -r
 * [Forge `CL.TE` request smuggling attack](#analyze-clte-request-treatment)
 * [How to build raw HTTP request?](#building-http-request)
 * [How to send raw HTTP request?](#send-raw-http-request)
+* [Visualize `TE.CL` (🖼️)](https://github.com/ariary/HTTPCustomHouse/blob/main/img/hch.png)
+* [Exploit `CL.TE` (📝)](https://github.com/ariary/HTTPCustomHouse/blob/main/EXAMPLES.md#exploiting-http-request-smuggling-to-reveal-front-end-request-rewriting)  
 
 ## Why ?
+
+The  main objective is to help in the making of smuggle request
+
+The goal is not to replace Burp, but to offer an alternative with CLi. This has the advantage to "automate" attack and so on
 
 ### *"HTTP Request Smugglin"* Kezako?
 
