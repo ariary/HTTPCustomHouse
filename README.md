@@ -24,7 +24,7 @@ HTTP request smuggling is a technique for interfering with the way a web site pr
 
 * To learn
 * Be able to solve challenge from CLi enable us to script resolution, automate exploit etc ...
-* `curl`, go http client, `ncat`, `openssl s_client` aren't fully satisfying especially when dealing whith "malformed http request"
+* `curl`, go http client, `ncat`, `openssl s_client` aren't fully satisfying especially when dealing with "malformed http request"
 
 **Real example:**
 * [Forge `TE.CL` request smuggling attack](https://github.com/ariary/HTTPCustomHouse/blob/main/EXAMPLES.md#analyze-tecl-request-treatment)
