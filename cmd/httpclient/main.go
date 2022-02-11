@@ -11,12 +11,14 @@ import (
 	"net"
 	"os"
 	"strings"
+
+	"github.com/ariary/HTTPCustomHouse/pkg/utils"
 )
 
 const usage = `Usage of httpclient: httpclient [url]
 Make http request from raw request. [url] is required and on the form: [protocol]://[addr]:[port]
   -k, --insecure     insecure HTTPS communication
-  -v, --verbose		 display sent request
+  -v, --verbose		 display sent request (-d to see special characters)
   -h, --help         prints help information 
 `
 
@@ -30,8 +32,10 @@ func main() {
 	flag.BoolVar(&insecure, "k", false, "Insecure HTTPS communication")
 
 	var verbose bool
+	var debug bool
 	flag.BoolVar(&verbose, "verbose", false, "Display sent request")
 	flag.BoolVar(&verbose, "v", false, "Display sent request")
+	flag.BoolVar(&debug, "d", false, "Display sent request with special character")
 	flag.Usage = func() { fmt.Print(usage) }
 	flag.Parse()
 
@@ -48,7 +52,13 @@ func main() {
 		log.Fatal(err)
 	}
 	if verbose {
+		if debug {
+			req = []byte(strings.ReplaceAll(string(req), "\r", utils.Green("\\r")))
+			req = []byte(strings.ReplaceAll(string(req), "\n", utils.Green("\\n\n")))
+
+		}
 		fmt.Println("--------------------- SEND:")
+
 		fmt.Println(string(req))
 		fmt.Println("--------------------- RECEIVE:")
 	}
