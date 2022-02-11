@@ -3,12 +3,13 @@
 <div align=center>
 <img src= https://github.com/ariary/HTTPCustomHouse/blob/main/img/E0D8F573-7824-42C1-BF6B-F58E5F14DB0E.png width=180>
 
-<br><strong><i>Simple offline simulation of server behavior helping to forge  HTTP smuggling attack</i></strong>
+<br><strong><i>CLi tools helping to forge  HTTP smuggling attack and others </i></strong>
 
+Analyze smuggled request without interacting with remote server <b>(httpcustomhouse)</b>. Manipulate raw HTTP request to sharpen attack <b>(httpoverride)</b>. Send raw HTTP request to perform the attack <b>(httpclient)</b>
 
 👁️ <strong>•</strong> 🔨 <strong>•</strong> 📬
     
-<b>httpcustomhouse</b> <strong>(</strong> analyze smuggled request <strong>)</strong> <strong>•</strong>  <b>httpoverride</b> <strong>(</strong>manipulate raw HTTP request<strong>)</strong> <strong>•</strong> <b>httpclient</b> <strong>(</strong>  send raw HTTP request <strong>)</strong>
+
 
 
 <!---<table>
