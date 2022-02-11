@@ -113,7 +113,7 @@ We have 3 possibilities:
 
 As `httpcustomhouse` use raw HTTP request as input you need to be able to construct it. There are several ways:
 * Intercept request with `burp`, `mitmproxy` and save it to a file
-* Use curl and an HTTP [`echo-server`](https://github.com/ariary/httpecho) to see sent request and save it to a file ***(SUGGESTED)**
+* Use curl and an HTTP [`echo-server`](https://github.com/ariary/httpecho) to see sent request and save it to a file ***(SUGGESTED)***
 * Take inspiration from the templates present in `samples` directory
 
 **⚠️**: It is important to embed `\r` character and other special characaters in your request file. Edit request with an editor could withdraw them. use `cat -A` to see them. For example, in chunk encoding the final `0` must be followed by `\r\n\r\n`. 
