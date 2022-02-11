@@ -157,7 +157,7 @@ nc -lp 8888 -c "tee myfile"
 As we deal with HTTP raw request we must be able to send them. `httpclient` is the equivalent of **`curl` for raw request**.
 
 **Why?**
-* `curl` & go http client rewrite http request (thi sis not satisfying for web pentest in general)
+* `curl` & go http client rewrite http request (this is not satisfying for web pentest in general)
 * `ncat` and `openssl s_client` aren't fully satisfying also
 
 ```shell
