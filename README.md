@@ -121,7 +121,7 @@ As `httpcustomhouse` use raw HTTP request as input you need to be able to constr
 ### Use echo server
 
 **First**, set up an [echo server](https://github.com/ariary/httpecho):
-```
+```shell
 httpecho -d raw
 # will save request in "raw" file
 ``` 
