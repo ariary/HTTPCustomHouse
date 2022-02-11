@@ -120,18 +120,19 @@ As `httpcustomhouse` use raw HTTP request as input you need to be able to constr
 
 ### Use echo server
 
-**First**, set up an echo server:
-* Use **[mine](https://github.com/ariary/httpecho)** (compatible with request smuggling research)
-* with `socat`
-* with `netcat`
-* Build your own
+**First**, set up an [echo server](https://github.com/ariary/httpecho):
+```
+httpecho -d raw
+# will save request in "raw" file
+``` 
 
 And then Make your `curl` request specifying your echo server as a proxy (the request won't reach the end server):
 ```shell
 curl --proxy http://localhost:[port] ...REQUEST...
 ```
 
-#### `Socat`
+#### Alternatives
+##### `Socat`
 
 Constantly server + see `\r` character
 
@@ -140,7 +141,7 @@ The one-liner:
 socat -v -v TCP-LISTEN:8888,crlf,reuseaddr,fork SYSTEM:"echo HTTP/1.0 200; echo Content-Type\: text/plain; echo; cat"
 ```
 
-#### `netcat`
+##### `netcat`
 
 Serve 1 request + save it in a file
 
