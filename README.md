@@ -5,13 +5,18 @@
 
 <br><strong><i>CLi tools helping to forge  HTTP smuggling attack and others </i></strong>
 
-Analyze smuggled request without interacting with remote server <b>(httpcustomhouse)</b>. Manipulate raw HTTP request to sharpen attack <b>(httpoverride)</b>. Send raw HTTP request to perform the attack <b>(httpclient)</b>
+
+<b>(<code>httpcustomhouse</code>)</b><br>
+Analyze smuggled request without interacting with remote server.
+
+<b>(<code>httpoverride</code>)</b><br>
+Manipulate raw HTTP request to sharpen attack.
+
+<b>(<code>httpclient</code>)</b><br>
+Send raw HTTP request to perform the attack 
+
 
 👁️ <strong>•</strong> 🔨 <strong>•</strong> 📬
-    
-
-
-
 <!---<table>
     <thead>
         <tr>
@@ -25,7 +30,9 @@ Analyze smuggled request without interacting with remote server <b>(httpcustomho
     </tbody>
 </table>-->
 </div> 
-  
+
+In order to offer a fully CLi experience while manipulating HTTP packets, these tools can be used with **[`httpecho`](https://github.com/ariary/httpecho)** which could help construct HTTP raw request
+
 ## Usage
 
 `httpcustomhouse` takes as input a raw HTTP request.
