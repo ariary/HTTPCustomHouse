@@ -15,34 +15,36 @@ Manipulate HTTP raw request to sharpen attack.
 <b>(<code>httpclient</code>)</b><br>
 Send HTTP raw request to perform the attack 
 
-
 👁️ <strong>•</strong> 🔨 <strong>•</strong> 📬
-<!---<table>
-    <thead>
-        <tr>
-          <th colspan="2">⬇️ <code>TE.CL</code> example</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td><img src=https://github.com/ariary/HTTPCustomHouse/blob/main/img/hch.png></td>
-        </tr>
-    </tbody>
-</table>-->
 </div> 
 
-In order to offer a fully CLi experience while manipulating HTTP packets, these tools can be used with **[`httpecho`](https://github.com/ariary/httpecho)** which could help construct HTTP raw request
+HTTP request smuggling is a technique for interfering with the way a web site processes sequences of HTTP requests ([more]()). The aim is to **perform request smuggling from command line**. It can't totally replace Burp Suite (or other GUI) but it proposes another approach, with more CLi. In order to offer a fully CLi experience while manipulating HTTP packets, these tools can be used with **[`httpecho`](https://github.com/ariary/httpecho)** which could help construct HTTP raw request. 
+
+**Why That?**
+
+* To learn
+* Be able to solve challenge from CLi enable us to script resolution, automate exploit etc ...
+* `curl`, go http client, `ncat`, `openssl s_client` aren't fully satisfying especially when dealing whith "malformed http request"
+
+**Real example:**
+* [Forge `TE.CL` request smuggling attack](https://github.com/ariary/HTTPCustomHouse/blob/main/EXAMPLES.md#analyze-tecl-request-treatment)
+* [Forge `CL.TE` request smuggling attack](https://github.com/ariary/HTTPCustomHouse/blob/main/EXAMPLES.md#analyze-clte-request-treatment)
+* [Exploit `CL.TE`](https://github.com/ariary/HTTPCustomHouse/blob/main/EXAMPLES.md#exploiting-http-request-smuggling-to-reveal-front-end-request-rewriting)
+
 
 ## Usage
 
-`httpcustomhouse` takes as input a raw HTTP request.
+### 👁️ `httpcustomhouse`
 
-**Show corresponding request treated by a server based on `Content-Length` Header**:  
+*> allow you to reproduce HTTP request processing without interacting with online server*
+
+**Show corresponding request treated by a server based on `Content-Length` Header treatment**:  
 ```shell
 cat samples/te.cl | httpcustomhouse -cl
 ```
+If the `Content-Length` is larger than the body size, the number of remaining bytes will be echoed
 
-**Show corresponding request treated by a server based on chunk encoding**:
+**Show corresponding request treated by a server based on chunk encoding treatment**:
 ```shell
 cat samples/cl.te | httpcustomhouse -te
 ```
@@ -53,20 +55,46 @@ cat samples/cl.te | httpcustomhouse -te -r
 # -r (or --residue) works also for -cl
 ```
 
-* [Forge `TE.CL` request smuggling attack](#analyze-tecl-request-treatment)
-* [Forge `CL.TE` request smuggling attack](#analyze-clte-request-treatment)
-* [How to build raw HTTP request?](#building-http-request)
-* [How to send raw HTTP request?](#send-raw-http-request)
-* [Visualize `TE.CL` (🖼️)](https://github.com/ariary/HTTPCustomHouse/blob/main/img/hch.png)
-* [Exploit `CL.TE` (📝)](https://github.com/ariary/HTTPCustomHouse/blob/main/EXAMPLES.md#exploiting-http-request-smuggling-to-reveal-front-end-request-rewriting)  
+Demo: [ (🖼️) Visualize `TE.CL` ](https://github.com/ariary/HTTPCustomHouse/blob/main/img/hch.png)
 
-## Why ?
+### 🔨 `httpoverride`
 
-The  main objective is to help in the making of smuggle request
+*> help to modify http request*
 
-The goal is not to replace Burp, but to offer an alternative with CLi. This has the advantage to "automate" attack and so on
+**Override/Modify Header of an HTTP request**:
+```shell
+cat [raw_request] | httpoverride -H "Content-Length:55" -A "Host: spoofed.com"
+# -A add header, -H override header
 
-### *"HTTP Request Smugglin"* Kezako?
+```
+**Remove Header of an HTTP request**:
+```shell
+cat [raw_request] | httpoverride -H "Accept:" # or -H "Accept"
+```
+
+
+### 📬 `httpclient`
+*> transmit HTTP request to server (HTTP client)*
+
+**Send a HTTP raw request**:
+```shell
+httpclient [protocol]:[url]:[port]  # port is falcultative https -> 443, http -> 80
+```
+
+## Install
+```shell
+# From Release:
+curl -lO -L https://github.com/ariary/HTTPCustomHouse/releases/latest/download/httpcustomhouse && chmod +x httpcustomhouse
+curl -lO -L https://github.com/ariary/HTTPCustomHouse/releases/latest/download/httpoverride && chmod +x httpoverride
+curl -lO -L https://github.com/ariary/HTTPCustomHouse/releases/latest/download/httpclient && chmod +x httpclient
+# With go:
+go install github.com/ariary/HTTPCustomHouse/cmd/httpcustomhouse@latest
+go install github.com/ariary/HTTPCustomHouse/cmd/httpclient@latest
+go install github.com/ariary/HTTPCustomHouse/cmd/httpoverride@latest
+```
+
+
+## *"HTTP Request Smuggling"* Kezako?
 
 HTTP request smuggling is a technique for interfering with the way a web site processes sequences of HTTP requests. It was discover in 2005, and repopularized by PortSwigger's research.
 
@@ -80,47 +108,12 @@ We have 3 possibilities:
 * **TE.CL**: Front end: `Transfer-Encoding`, back end: `Content-Length`. (Fake `Content-Length`)
 * **TE.TE**: Both server use `Transfer-Encoding` but one of those can be induced to not process it by obfuscating the header in some way
 
-### Analyze `TE.CL` request treatment
-
-As we want to see how a request is treated and thus how we could interfere this treatment, we will simulate it.
-
-**First**, The front-end server treats the request using `Content-Length` header:
-```shell
-cat request | httpcustomhouse -cl
-## Output is the request transmitted to front-end
-```
-
-**Then**, The front use `chunk` encoding to parse HTTP request:
-```shell
-cat request | httpcustomhouse -cl | httpcustomhouse -te
-## Output is the request treated by back end
-```
-
-**Finally**, if we want to see if there is some part of `request` that hasn't been treated by backend and thus will be interpreted as the beginning of the next request:
-```shell
-cat request | httpcustomhouse -cl | httpcustomhouse -te -r
-## Output is the request treated by back end
-## Color output: the part of the request not treated by backend
-## TRICK: add 2>&1 >/dev/null at the end to only obtain the non-treated part
-```
-
-### Analyze `CL.TE` request treatment
-
-Same as [`TE.CL`](#analyze-tecl-request-treatment) idea:
-
-First parse request using `chunk` encoding, then using `Content-Length` and finally print part of the request not already treated by back end:
-```shell
-cat request | httpcustomhouse -te | httpcustomhouse -cl -r
-## Output is the request treated by back end
-## Color output: the part of the request not treated by backend
-## TRICK: add 2>&1 >/dev/null at the end to only obtain the non-treated part
-```
 
 ## Building HTTP request
 
 As `httpcustomhouse` use raw HTTP request as input you need to be able to construct it. There are several ways:
 * Intercept request with `burp`, `mitmproxy` and save it to a file
-* Use curl and an HTTP [`echo-server`](https://github.com/ariary/httpecho) to see sending request and save it to a file
+* Use curl and an HTTP [`echo-server`](https://github.com/ariary/httpecho) to see sent request and save it to a file ***(SUGGESTED)**
 * Take inspiration from the templates present in `samples` directory
 
 **⚠️**: It is important to embed `\r` character and other special characaters in your request file. Edit request with an editor could withdraw them. use `cat -A` to see them. For example, in chunk encoding the final `0` must be followed by `\r\n\r\n`. 
@@ -147,7 +140,6 @@ The one-liner:
 socat -v -v TCP-LISTEN:8888,crlf,reuseaddr,fork SYSTEM:"echo HTTP/1.0 200; echo Content-Type\: text/plain; echo; cat"
 ```
 
-
 #### `netcat`
 
 Serve 1 request + save it in a file
@@ -158,28 +150,14 @@ nc -lp 8888 -c "tee myfile"
 ## or nc -nlvp 8888 > myfile  2>/dev/null &
 ```
 
-#### Example
-
-~ To build `samples/diff-te.cl`:
-```shell
-## Construct embedded request
-nc -lp 8888 -c "tee data" #use another shell to make curl request
-curl -X GET --proxy http://localhost:8888/  vulnerable-website.com -H 'Content-Length: 144' -H 'Content-Type: application/x-www-form-urlencoded'
-
-## Construct the whole request
-nc -lp 8888 -c "tee diff-te.cl" #use another shell to make curl request
-curl -X POST --proxy http://localhost:8888/  vulnerable-website.com --data-binary "@data" -H 'transfer-encoding:chunked' -H 'Content-Length: 4'
-rm data
-
-```
 
 ## Send raw HTTP request
 
-`httpclient` is the equivalent of **`curl` for raw request**.
+As we deal with HTTP raw request we must be able to send them. `httpclient` is the equivalent of **`curl` for raw request**.
 
 **Why?**
-* `curl` & go http client rewrite http request
-* `ncat` and `openssl s_client` aren't fulle satisfying
+* `curl` & go http client rewrite http request (thi sis not satisfying for web pentest in general)
+* `ncat` and `openssl s_client` aren't fully satisfying also
 
 ```shell
 cat [raw_request] | httpclient https://[URL]:[PORT]
@@ -191,19 +169,6 @@ When you request is good, send it:
 cat [raw_request] | openssl s_client -ign_eof -connect [target_url]:443
 #or use ncat from nmap package
 cat [raw_request]| ncat --ssl [target_url] 443
-```
-
-Or if the target does not use tls/ssl:
-
-```Shell
+# or if target does not use tls/ssl
 cat [raw_request] | nc -q 5 [target_url] 80 # or -w 5
-```
-
-## Install
-```shell
-# From Release:
-curl -lO -L https://github.com/ariary/HTTPCustomHouse/releases/latest/download/httpcustomhouse && chmod +x httpcustomhouse
-
-# With go:
-go install github.com/ariary/HTTPCustomHouse/cmd/httpcustomhouse@latest
 ```
