@@ -10,10 +10,10 @@
 Analyze smuggled request without interacting with remote server.
 
 <b>(<code>httpoverride</code>)</b><br>
-Manipulate raw HTTP request to sharpen attack.
+Manipulate HTTP raw request to sharpen attack.
 
 <b>(<code>httpclient</code>)</b><br>
-Send raw HTTP request to perform the attack 
+Send HTTP raw request to perform the attack 
 
 
 👁️ <strong>•</strong> 🔨 <strong>•</strong> 📬
