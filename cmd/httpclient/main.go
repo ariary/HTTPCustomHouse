@@ -18,7 +18,7 @@ import (
 const usage = `Usage of httpclient: httpclient [url]
 Make http request from raw request. [url] is required and on the form: [protocol]://[addr]:[port]
   -k, --insecure     insecure HTTPS communication
-  -v, --verbose		 display sent request (-d to see special characters)
+  -v, --verbose	     display sent request (-d to see special characters)
   -h, --help         prints help information 
 `
 
