@@ -1,25 +1,59 @@
 # Examples
 
 
-The aim is to perform request smuggling from command line. The aim is not to totally replace Burp Suite but to propose another approach., with more CLi.
-
-**Why That?**
-* To learn
-* Be able to solve challenge from CLi enable us to script resolution, automate exploit etc ...
-
-The following examples are an alternative to PortSwigger Burp solutions provided for the PortSwigger Burp academy. They use:
+Use example of:
 * [`httpcustomhouse`](https://github.com/ariary/HTTPCustomHouse): to simulate server behavior regarding `Content-Length` and chunk encoding
 * [`httpoverride`](https://github.com/ariary/HTTPCustomHouse): to change headers of raw request for people not at ease with `sed` 
 * [`httpecho`](https://github.com/ariary/httpecho): HTTP echo server echoing request exactly as it is received
 * [`httpclient`](https://github.com/ariary/HTTPCustomHouse): `curl` for raw packet because curl, golang http client rewrite packet and `ncat` or `openssl s_client` aren't satisfying
 
+## Analyze `TE.CL` request treatment
+
+As we want to see how a request is treated and thus how we could interfere this treatment, we will simulate it.
+
+**First**, The front-end server treats the request using `Content-Length` header:
+```shell
+cat request | httpcustomhouse -cl
+## Output is the request transmitted to front-end
+```
+
+**Then**, The front use `chunk` encoding to parse HTTP request:
+```shell
+cat request | httpcustomhouse -cl | httpcustomhouse -te
+## Output is the request treated by back end
+```
+
+**Finally**, if we want to see if there is some part of `request` that hasn't been treated by backend and thus will be interpreted as the beginning of the next request:
+```shell
+cat request | httpcustomhouse -cl | httpcustomhouse -te -r
+## Output is the request treated by back end
+## Color output: the part of the request not treated by backend
+## TRICK: add 2>&1 >/dev/null at the end to only obtain the non-treated part
+```
+
+## Analyze `CL.TE` request treatment
+
+Same as [`TE.CL`](#analyze-tecl-request-treatment) idea:
+
+First parse request using `chunk` encoding, then using `Content-Length` and finally print part of the request not already treated by back end:
+```shell
+cat request | httpcustomhouse -te | httpcustomhouse -cl -r
+## Output is the request treated by back end
+## Color output: the part of the request not treated by backend
+## TRICK: add 2>&1 >/dev/null at the end to only obtain the non-treated part
+```
+
+
+
+## Exploiting HTTP request smuggling to reveal front-end request rewriting
+
+The following example is an alternative to PortSwigger Burp solution for their [lab](https://portswigger.net/web-security/request-smuggling/exploiting/lab-reveal-front-end-request-rewriting).
+
+
 Also to reproduce steps, Export an env var for the lab endpoint:
 ```shell
 export LAB_URL=[YOUR_LAB_URL]
 ```
-
-## [Exploiting HTTP request smuggling to reveal front-end request rewriting](https://portswigger.net/web-security/request-smuggling/exploiting/lab-reveal-front-end-request-rewriting)
-
 
 Browsing `/admin` endpoint we've got: `Admin interface only available if logged in as an administrator, or if requested from 127.0.0.1`
 
@@ -102,7 +136,7 @@ Send the request:
 cat smuggle | httpclient https://$LAB_URL
 ```
 
-💥 Sending it twice. In the second response, as expected we obtain the header of the request including one adde by front-end: (search for `X-*-IP` after search):
+💥 Send it twice. In the second response, as expected we obtain the header of the request including one adde by front-end: (search for `X-*-IP` after search):
 ```shell
 cat smuggle | httpclient https://$LAB_URL > smuggle_response
 # To directly have Header value
