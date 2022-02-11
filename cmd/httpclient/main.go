@@ -52,14 +52,14 @@ func main() {
 		log.Fatal(err)
 	}
 	if verbose {
-		if debug {
-			req = []byte(strings.ReplaceAll(string(req), "\r", utils.Green("\\r")))
-			req = []byte(strings.ReplaceAll(string(req), "\n", utils.Green("\\n\n")))
-
-		}
 		fmt.Println("--------------------- SEND:")
-
+		if debug {
+			reqDebug := strings.ReplaceAll(string(req), "\r", utils.Green("\\r"))
+			reqDebug = strings.ReplaceAll(reqDebug, "\n", utils.Green("\\n\n"))
+			fmt.Println(reqDebug)
+		}else{
 		fmt.Println(string(req))
+		}
 		fmt.Println("--------------------- RECEIVE:")
 	}
 
