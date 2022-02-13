@@ -23,7 +23,7 @@ HTTP request smuggling is a technique for interfering with the way a web site pr
 **Why That?**
 
 * To learn
-* Be able to solve challenge from CLi enable us to script resolution, automate exploit etc ...
+* Be able to solve challenge from CLi helps us to script resolution, automate exploit etc ...
 * `curl`, go http client, `ncat`, `openssl s_client` aren't fully satisfying especially when dealing with "malformed http request"
 
 **Real example:**
