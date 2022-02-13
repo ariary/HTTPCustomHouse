@@ -9,9 +9,12 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net"
+	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/ariary/HTTPCustomHouse/pkg/config"
 	"github.com/ariary/HTTPCustomHouse/pkg/parser"
@@ -77,19 +80,44 @@ func main() {
 		rawRequest = request.GetRawHTTPRequest(cfg.Request)
 	}
 
-	if cfg.Verbose {
-		fmt.Println("--------------------- SEND:")
-		if cfg.Debug {
-			reqDebug := strings.ReplaceAll(string(rawRequest), "\r", utils.Green("\\r"))
-			reqDebug = strings.ReplaceAll(reqDebug, "\n", utils.Green("\\n\n"))
-			fmt.Println(reqDebug)
-		} else {
-			fmt.Println(string(rawRequest)) // raw request ~ request.GetRawRequest(cfg.Request)
+	if cfg.InBrowser { // in browser
+		BrowserMode(cfg)
+	} else { // in output
+		if cfg.Verbose {
+			fmt.Println("--------------------- SEND:")
+			if cfg.Debug {
+				reqDebug := strings.ReplaceAll(string(rawRequest), "\r", utils.Green("\\r"))
+				reqDebug = strings.ReplaceAll(reqDebug, "\n", utils.Green("\\n\n"))
+				fmt.Println(reqDebug)
+			} else {
+				fmt.Println(string(rawRequest)) // raw request ~ request.GetRawRequest(cfg.Request)
+			}
+			fmt.Println("--------------------- RECEIVE:")
 		}
-		fmt.Println("--------------------- RECEIVE:")
-	}
 
+		respText := PerformRequest(cfg)
+
+		//response, err := parser.ParseResponse(cfg.Request.Method, cfg.AddrPort, respText)
+		// if err != nil {
+		// 	log.Fatal("Failed parsing response:", err)
+		// }
+
+		// switch status := response.Status; {
+		// case status >= 301 && status <= 303:
+		// 	fmt.Println("Follow redirect using get")
+		// case status < 301:
+		// 	fmt.Println("nothing")
+		// case status > 303:
+		// 	fmt.Println("nothing")
+		// }
+
+		fmt.Println(respText)
+	}
+}
+
+func PerformRequest(cfg config.ClientConfig) (fullResponseText string) {
 	var conn net.Conn
+	var err error
 	if cfg.Tls {
 		conf := &tls.Config{
 			InsecureSkipVerify: cfg.Insecure,
@@ -104,6 +132,8 @@ func main() {
 		return
 	}
 	defer conn.Close()
+
+	rawRequest := request.GetRawHTTPRequest(cfg.Request)
 	n, err := conn.Write(rawRequest)
 	if err != nil {
 		log.Println(n, err)
@@ -113,20 +143,48 @@ func main() {
 	// //print response
 	var buf bytes.Buffer
 	io.Copy(&buf, conn)
-	respText := buf.String()
-	//response, err := parser.ParseResponse(cfg.Request.Method, cfg.AddrPort, respText)
-	// if err != nil {
-	// 	log.Fatal("Failed parsing response:", err)
-	// }
+	fullResponseText = buf.String()
+	return fullResponseText
+}
 
-	// switch status := response.Status; {
-	// case status >= 301 && status <= 303:
-	// 	fmt.Println("Follow redirect using get")
-	// case status < 301:
-	// 	fmt.Println("nothing")
-	// case status > 303:
-	// 	fmt.Println("nothing")
-	// }
+//BrowserMode: Enable to perform request in browser
+// Set up a local http server with specific endpoint to reach.
+// When this endpoint is reached => request is performed and
+// request body returned with <base> tag added if not present
+//to redirect each link to original URL
+func BrowserMode(cfg config.ClientConfig) {
+	endpoint := "/" + generateEndpoint()
 
-	fmt.Println(respText)
+	fmt.Println("Visit http://localhost:8080" + endpoint)
+	requestHandler := &RequestHandler{Config: cfg}
+	http.HandleFunc("/", requestHandler.requestWebhook)
+	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+type RequestHandler struct {
+	Config config.ClientConfig
+}
+
+//perform a requets when reached
+func (rh *RequestHandler) requestWebhook(w http.ResponseWriter, r *http.Request) {
+	//	fmt.Fprintf(w, "request on "+rh.Config.AddrPort)
+	responseText := PerformRequest(rh.Config)
+	response, err := parser.ParseResponse(rh.Config.Request.Method, rh.Config.AddrPort, responseText)
+	if err != nil {
+		log.Fatal("Failed parsing response:", err)
+	}
+	body := response.Body
+	//TODO add <base> tag
+	fmt.Fprintf(w, string(body))
+}
+
+//generateEndpoint: generate a "random" string of 6 alphanumeric charcaters
+func generateEndpoint() string {
+	rand.Seed(time.Now().UnixNano())
+	var characters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789")
+	b := make([]rune, 6)
+	for i := range b {
+		b[i] = characters[rand.Intn(len(characters))]
+	}
+	return string(b)
 }
