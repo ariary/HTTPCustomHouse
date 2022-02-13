@@ -23,6 +23,8 @@ const usage = `Usage of httpclient: httpclient [url]
 Make http request from raw request. [url] is required and on the form: [protocol]://[addr]:[port]
   -k, --insecure     insecure HTTPS communication
   -v, --verbose	     display sent request (-d to see special characters)
+  -L, --location     follow redirects
+  -B, --browser      perform current request in browser
   -h, --help         prints help information 
 `
 
@@ -39,6 +41,13 @@ func main() {
 	flag.BoolVar(&cfg.Verbose, "verbose", false, "Display sent request")
 	flag.BoolVar(&cfg.Verbose, "v", false, "Display sent request")
 	flag.BoolVar(&cfg.Debug, "d", false, "Display sent request with special character")
+
+	flag.BoolVar(&cfg.Follow, "location", false, "Follow redirections")
+	flag.BoolVar(&cfg.Follow, "L", false, "Follow redirections")
+
+	flag.BoolVar(&cfg.InBrowser, "browser", false, "Perform current request in browser")
+	flag.BoolVar(&cfg.InBrowser, "B", false, "Perform current request in browser")
+
 	flag.Usage = func() { fmt.Print(usage) }
 	flag.Parse()
 
