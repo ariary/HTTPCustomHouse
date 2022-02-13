@@ -2,6 +2,7 @@ package parser
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -10,6 +11,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/ariary/HTTPCustomHouse/pkg/request"
+	"github.com/ariary/HTTPCustomHouse/pkg/response"
 	"github.com/ariary/HTTPCustomHouse/pkg/utils"
 )
 
@@ -44,7 +47,7 @@ func ParseRequest(reader *bufio.Reader) (httpHeader http.Header, bodyB []byte, e
 }
 
 //Parse a request to retrieve headers and body but do not print any information
-func ParseRequestWithoutPrint(reader *bufio.Reader) (method string, httpHeader http.Header, bodyB []byte, err error) {
+func ParseRequestWithoutPrint(reader *bufio.Reader) (request request.Request, err error) {
 	tp := textproto.NewReader(reader)
 
 	// First line: POST /index.html HTTP/1.0 or other
@@ -53,23 +56,31 @@ func ParseRequestWithoutPrint(reader *bufio.Reader) (method string, httpHeader h
 	if s, err = tp.ReadLine(); err != nil {
 		log.Fatal(err)
 	}
-	method = strings.Split(s, " ")[0] //if error => Wrong raw packet
+	request.CommandLine = s
+
+	request.Method = strings.Split(s, " ")[0] //if error => Wrong raw packet
+	tmpSlash := strings.Split(s, "/")
+	if len(tmpSlash) < 3 {
+		return request, errors.New("first line of request seems incorrect")
+	} else {
+		request.Version = tmpSlash[2]
+	}
 
 	mimeHeader, err := tp.ReadMIMEHeader()
 	if err != nil && err != io.EOF {
-		return method, nil, nil, err
+		return request, err
 	}
 	// http.Header and textproto.MIMEHeader are both just a map[string][]string
-	httpHeader = http.Header(mimeHeader)
+	request.Headers = http.Header(mimeHeader)
 
 	//Get body
-	bodyB, err = io.ReadAll(tp.R)
+	request.Body, err = io.ReadAll(tp.R)
 	if err != nil {
-		return method, nil, nil, err
+		return request, err
 	}
-	bodyB = append([]byte("\n"), bodyB...)
+	//bodyB = append([]byte("\n"), bodyB...)
 
-	return method, httpHeader, bodyB, err
+	return request, err
 }
 
 //Parse the body according to chunk encoding
@@ -110,4 +121,61 @@ func FilterWithContentLength(contentLength int, body []byte, residue bool) {
 			fmt.Fprintf(os.Stderr, utils.Purple(bodyResidue))
 		}
 	}
+}
+
+//ParseURl: parse an url to retreive protocol and address
+func ParseUrl(url string) (tls bool, addr string) {
+	if !strings.HasPrefix(url, "http") {
+		log.Fatal("Bad url argument want: [protocol]://[addr]:[port]")
+	}
+	tmp := strings.Split(url, ":")
+	if len(tmp) < 2 {
+		log.Fatal("Bad url argument want: [protocol]://[addr]:[port]")
+	}
+	protocol := tmp[0]
+	switch protocol {
+	case "https":
+		tls = true
+	default:
+		tls = false
+	}
+
+	switch len(tmp) {
+	case 2: //port is not provided
+		url := strings.Split(tmp[1], "/")[2]
+		var port string
+		if tls {
+			port = "443"
+		} else {
+			port = "80"
+		}
+		addr = url + ":" + port
+	case 3: //port is provided
+		url := strings.Split(tmp[1], "/")[2]
+		addr = url + ":" + tmp[2] //url:port
+	default:
+		log.Fatal("Bad url argument want: [protocol]://[addr]:[port]")
+	}
+	return tls, addr
+}
+
+//ParseResponse: parse an HTTP response to retrieve the status line, the header field and the body
+func ParseResponse(reqMethod string, url string, resp string) (response response.Response, err error) {
+	r := bufio.NewReader(strings.NewReader(resp))
+	req, err := http.NewRequest(reqMethod, url, nil)
+	if err != nil {
+		return response, err
+	}
+
+	httpResp, err := http.ReadResponse(r, req)
+	if err != nil {
+		return response, err
+	}
+
+	defer httpResp.Body.Close()
+	response.Status = httpResp.StatusCode
+	response.Headers = httpResp.Header
+	response.Body, err = io.ReadAll(httpResp.Body)
+
+	return response, err
 }
