@@ -12,6 +12,7 @@ import (
 	"math/rand"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -157,16 +158,18 @@ func BrowserMode(cfg config.ClientConfig) {
 
 	fmt.Println("Visit http://localhost:8080" + endpoint)
 	requestHandler := &RequestHandler{Config: cfg}
-	http.HandleFunc("/", requestHandler.requestWebhook)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	http.HandleFunc(endpoint, requestHandler.requestWebhookHandler)
+	http.HandleFunc("/", requestHandler.proxyHandler)
+	log.Fatal(http.ListenAndServe(":8888", nil))
 }
 
 type RequestHandler struct {
 	Config config.ClientConfig
+	Client http.Client
 }
 
 //perform a requets when reached
-func (rh *RequestHandler) requestWebhook(w http.ResponseWriter, r *http.Request) {
+func (rh *RequestHandler) requestWebhookHandler(w http.ResponseWriter, r *http.Request) {
 	//	fmt.Fprintf(w, "request on "+rh.Config.AddrPort)
 	responseText := PerformRequest(rh.Config)
 	response, err := parser.ParseResponse(rh.Config.Request.Method, rh.Config.AddrPort, responseText)
@@ -176,6 +179,48 @@ func (rh *RequestHandler) requestWebhook(w http.ResponseWriter, r *http.Request)
 	body := response.Body
 	//TODO add <base> tag
 	fmt.Fprintf(w, string(body))
+	fmt.Println("[*] request endpoint webhook reached: forwarded to", rh.Config.AddrPort)
+}
+
+//Endpoint to redirect request to other endpoint (in rh.Config object)
+// use to proxify traffic between browser and target with cookie, headers etc
+func (rh *RequestHandler) proxyHandler(w http.ResponseWriter, r *http.Request) {
+	endpoint := rh.Config.AddrPort + "/" + r.URL.Path[1:]
+	//modify request
+	r.Host = rh.Config.AddrPort
+
+	// Since the r.URL will not have all the information set,
+	// such as protocol scheme and host, we create a new URL
+	r.RequestURI = "" //mandatory
+	var urlS string
+	if rh.Config.Tls {
+		urlS = "https://"
+	} else {
+		urlS = "http://"
+	}
+	urlS += endpoint
+	u, err := url.Parse(urlS)
+	if err != nil {
+		panic(err)
+	}
+	r.URL = u
+
+	//TODO: add Cookie header from rh.Confing.Headers
+	//TODO: perform request with request.Perform
+	// perform request
+	resp, err := rh.Client.Do(r)
+	if err != nil {
+		fmt.Println("failed proxifying to", endpoint, ":", err)
+		return
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("failed reading body from", endpoint, ":", err)
+		return
+	}
+	fmt.Fprintf(w, string(body))
+	fmt.Println("[~>] request proxyfied to:", endpoint)
 }
 
 //generateEndpoint: generate a "random" string of 6 alphanumeric charcaters
