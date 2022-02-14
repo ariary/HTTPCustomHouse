@@ -123,7 +123,7 @@ func FilterWithContentLength(contentLength int, body []byte, residue bool) {
 	}
 }
 
-//ParseURl: parse an url ([protocol]://[addr]:[port]) to retreive protocol and address
+//ParseURl: parse an url ([protocol]://[addr]:[port]) to retreive protocol and address (address contains port)
 func ParseUrl(url string) (tls bool, addr string) {
 	if !strings.HasPrefix(url, "http") {
 		log.Fatal("Bad url argument want: [protocol]://[addr]:[port]")

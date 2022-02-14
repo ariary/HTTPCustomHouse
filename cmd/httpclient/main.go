@@ -102,27 +102,22 @@ func main() {
 		if cfg.Follow {
 			switch status := response.Status; {
 			case status >= 301 && status <= 303:
-				fmt.Println("Follow redirect using get")
 				switch location := response.Headers.Get("Location"); {
 				case location == "":
 					fmt.Println(respText)
 					log.Fatal("Failed to retrieve Location header in 30X response")
-				case strings.HasPrefix(location, "https"):
-					//ugly maybe use golang net http client
-					cfg.Tls = true
-					urlParsed := strings.Split(location, "/")
-					// cfg.AddrPort = strings.Join(urlParsed[0:3], "/") + ":443" + "/" + strings.Join(urlParsed[4:], "/")
-					cfg.AddrPort = urlParsed[2] + ":443"
-					fmt.Println(cfg.AddrPort)
-					fmt.Println(cfg.Request.CommandLine)
-					path := "/" + strings.Join(urlParsed[4:], "/")
+				case strings.HasPrefix(location, "http"):
+					isEncrypted, addr := parser.ParseUrl(location)
+					if isEncrypted {
+						cfg.Tls = true
+					} else {
+						cfg.Tls = false
+					}
+					cfg.AddrPort = addr
+					path := "/" + strings.Join(strings.Split(location, "/")[4:], "/")
 					cfg.Request.ChangePath(path)
-					//Modify path in command line (add function in request)
-				case strings.HasPrefix(location, "http:"):
-					//ugly maybe use golang net http client
-					cfg.Tls = false
-					urlParsed := strings.Split(location, "/")
-					cfg.AddrPort = strings.Join(urlParsed[0:3], "/") + ":80" + "/" + strings.Join(urlParsed[4:], "/")
+					//Update Host
+					cfg.Request.Headers["Host"] = []string{strings.Split(cfg.AddrPort, ":")[0]}
 				default:
 					cfg.AddrPort += location
 				}
@@ -137,6 +132,8 @@ func main() {
 				fmt.Println(redirectResponseText)
 			case status > 303 && status < 400:
 				fmt.Println("remake request")
+				redirectResponseText := client.PerformRequest(cfg)
+				fmt.Println(redirectResponseText)
 			// case status > 303:
 			// 	fmt.Println("nothing")
 			default:

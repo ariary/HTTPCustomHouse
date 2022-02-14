@@ -2,6 +2,7 @@ package request
 
 import (
 	"net/http"
+	"strings"
 )
 
 type Request struct {
@@ -35,7 +36,8 @@ func GetRawHTTPRequest(req Request) (rawRequest []byte) {
 
 //ChangePath: Change the path uri with the one provided for the HTTP Request (modify first line of the raw request)
 func (request *Request) ChangePath(path string) {
-	// := strings.Split(request.CommandLine, " ")[0] (0: GET, 1:path 2: version)
-	// split change [1] join avec " "
-	//request.CommandLine = ...
+	commandLineSplitted := strings.Split(request.CommandLine, " ") //(0: medthod, 1:path 2: version)
+	commandLineSplitted[1] = path
+	request.CommandLine = strings.Join(commandLineSplitted, " ")
+
 }
