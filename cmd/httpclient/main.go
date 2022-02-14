@@ -100,6 +100,12 @@ func main() {
 		}
 
 		if cfg.Follow {
+			if cfg.Verbose {
+				fmt.Println(respText)
+				fmt.Println("********************* REDIRECT:")
+			}
+			var redirectResponseText string
+
 			switch status := response.Status; {
 			case status >= 301 && status <= 303:
 				switch location := response.Headers.Get("Location"); {
@@ -127,18 +133,30 @@ func main() {
 				if cookies := response.Headers.Get("Cookie"); cookies != "" {
 					cfg.Request.Headers.Add("Cookie", cookies)
 				}
-				redirectResponseText := client.PerformRequest(cfg)
-				//from now follow only 1 redirect
-				fmt.Println(redirectResponseText)
+
+				redirectResponseText = client.PerformRequest(cfg)
 			case status > 303 && status < 400:
-				fmt.Println("remake request")
-				redirectResponseText := client.PerformRequest(cfg)
-				fmt.Println(redirectResponseText)
+				redirectResponseText = client.PerformRequest(cfg)
 			// case status > 303:
 			// 	fmt.Println("nothing")
 			default:
-				fmt.Println(respText)
+				redirectResponseText = respText
 			}
+
+			rawRequest = request.GetRawHTTPRequest(cfg.Request)
+			if cfg.Verbose {
+				fmt.Println("--------------------- SEND:")
+				if cfg.Debug {
+					reqDebug := strings.ReplaceAll(string(rawRequest), "\r", utils.Green("\\r"))
+					reqDebug = strings.ReplaceAll(reqDebug, "\n", utils.Green("\\n\n"))
+					fmt.Println(reqDebug)
+				} else {
+					fmt.Println(string(rawRequest)) // raw request ~ request.GetRawRequest(cfg.Request)
+				}
+				fmt.Println("--------------------- RECEIVE:")
+			}
+			//from now follow only 1 redirect
+			fmt.Println(redirectResponseText)
 		} else {
 			fmt.Println(respText)
 		}
