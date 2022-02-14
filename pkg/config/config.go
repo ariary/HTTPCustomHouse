@@ -9,6 +9,7 @@ type ClientConfig struct {
 	Follow    bool
 	InBrowser bool
 	Tls       bool
-	AddrPort  string
+	AddrPort  string //addr:port
+	Url       string //protocol://addr:port
 	Request   request.Request
 }
