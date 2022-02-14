@@ -94,20 +94,56 @@ func main() {
 
 		respText := client.PerformRequest(cfg)
 
-		//response, err := parser.ParseResponse(cfg.Request.Method, cfg.AddrPort, respText)
-		// if err != nil {
-		// 	log.Fatal("Failed parsing response:", err)
-		// }
+		response, err := parser.ParseResponse(cfg.Request.Method, cfg.AddrPort, respText)
+		if err != nil {
+			log.Fatal("Failed parsing response:", err)
+		}
 
-		// switch status := response.Status; {
-		// case status >= 301 && status <= 303:
-		// 	fmt.Println("Follow redirect using get")
-		// case status < 301:
-		// 	fmt.Println("nothing")
-		// case status > 303:
-		// 	fmt.Println("nothing")
-		// }
+		if cfg.Follow {
+			switch status := response.Status; {
+			case status >= 301 && status <= 303:
+				fmt.Println("Follow redirect using get")
+				switch location := response.Headers.Get("Location"); {
+				case location == "":
+					fmt.Println(respText)
+					log.Fatal("Failed to retrieve Location header in 30X response")
+				case strings.HasPrefix(location, "https"):
+					//ugly maybe use golang net http client
+					cfg.Tls = true
+					urlParsed := strings.Split(location, "/")
+					// cfg.AddrPort = strings.Join(urlParsed[0:3], "/") + ":443" + "/" + strings.Join(urlParsed[4:], "/")
+					cfg.AddrPort = urlParsed[2] + ":443"
+					fmt.Println(cfg.AddrPort)
+					fmt.Println(cfg.Request.CommandLine)
+					path := "/" + strings.Join(urlParsed[4:], "/")
+					cfg.Request.ChangePath(path)
+					//Modify path in command line (add function in request)
+				case strings.HasPrefix(location, "http:"):
+					//ugly maybe use golang net http client
+					cfg.Tls = false
+					urlParsed := strings.Split(location, "/")
+					cfg.AddrPort = strings.Join(urlParsed[0:3], "/") + ":80" + "/" + strings.Join(urlParsed[4:], "/")
+				default:
+					cfg.AddrPort += location
+				}
 
-		fmt.Println(respText)
+				cfg.Request.Method = "GET"
+				// add cookie if present
+				if cookies := response.Headers.Get("Cookie"); cookies != "" {
+					cfg.Request.Headers.Add("Cookie", cookies)
+				}
+				redirectResponseText := client.PerformRequest(cfg)
+				//from now follow only 1 redirect
+				fmt.Println(redirectResponseText)
+			case status > 303 && status < 400:
+				fmt.Println("remake request")
+			// case status > 303:
+			// 	fmt.Println("nothing")
+			default:
+				fmt.Println(respText)
+			}
+		} else {
+			fmt.Println(respText)
+		}
 	}
 }

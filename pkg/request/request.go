@@ -32,3 +32,10 @@ func GetRawHTTPRequest(req Request) (rawRequest []byte) {
 
 	return rawRequest
 }
+
+//ChangePath: Change the path uri with the one provided for the HTTP Request (modify first line of the raw request)
+func (request *Request) ChangePath(path string) {
+	// := strings.Split(request.CommandLine, " ")[0] (0: GET, 1:path 2: version)
+	// split change [1] join avec " "
+	//request.CommandLine = ...
+}
