@@ -1,6 +1,10 @@
 package utils
 
-import "fmt"
+import (
+	"fmt"
+	"math/rand"
+	"time"
+)
 
 var (
 	Info = Teal
@@ -32,4 +36,15 @@ func Color(colorString string) func(...interface{}) string {
 			fmt.Sprint(args...))
 	}
 	return sprint
+}
+
+//GenerateRandom: generate a "random" string of 6 alphanumeric charcaters
+func GenerateRandom() string {
+	rand.Seed(time.Now().UnixNano())
+	var characters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789")
+	b := make([]rune, 6)
+	for i := range b {
+		b[i] = characters[rand.Intn(len(characters))]
+	}
+	return string(b)
 }
