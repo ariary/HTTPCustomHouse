@@ -7,13 +7,13 @@
 
 
 <b>(<code>httpcustomhouse</code>)</b><br>
-Analyze smuggled request without interacting with remote server.
+Analyze smuggled request without interacting with remote server. <sup><i><a href=#%EF%B8%8F-httpcustomhouse>(use it)</a></i></sup>
 
 <b>(<code>httpoverride</code>)</b><br>
-Manipulate HTTP raw request to sharpen attack.
+Manipulate HTTP raw request to sharpen attack. <sup><i><a href=#-httpoverride>(use it)</a></i></sup>
 
 <b>(<code>httpclient</code>)</b><br>
-Send HTTP raw request to perform the attack 
+Send HTTP raw request to perform the attack . <sup><i><a href=#-httpclient>(use it)</a></i></sup>
 
 👁️ <strong>•</strong> 🔨 <strong>•</strong> 📬
 </div> 
