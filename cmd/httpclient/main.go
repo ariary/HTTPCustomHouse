@@ -104,12 +104,11 @@ func main() {
 				fmt.Println(respText)
 				fmt.Println("********************* REDIRECT:")
 			}
-			redirectResponseText, err := client.Redirect(cfg, response)
+			redirectResponseText, err := client.Redirect(&cfg, response)
 			if err != nil {
 				fmt.Println(respText)
 				log.Fatal(err)
 			}
-
 			rawRequest = request.GetRawHTTPRequest(cfg.Request)
 			if cfg.Verbose {
 				fmt.Println("--------------------- SEND:")
