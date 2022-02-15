@@ -8,12 +8,10 @@ import (
 	"log"
 	"net/http"
 	"net/textproto"
-	"os"
 	"strings"
 
 	"github.com/ariary/HTTPCustomHouse/pkg/request"
 	"github.com/ariary/HTTPCustomHouse/pkg/response"
-	"github.com/ariary/HTTPCustomHouse/pkg/utils"
 )
 
 //Parse a request to retrieve headers and body
@@ -84,42 +82,39 @@ func ParseRequestWithoutPrint(reader *bufio.Reader) (request request.Request, er
 }
 
 //Parse the body according to chunk encoding
-func FilterWithChunkEncoding(body []byte, residue bool) {
+func FilterWithChunkEncoding(body []byte) (bodyTE []byte, residueB []byte) {
 	// TODO: implement real chunked encoding
 	// read body till 0
 	endChunk := strings.Index(string(body), "0\r\n\r\n")
 	if endChunk == -1 {
 		log.Fatal("Failed to retrieve end of chunks in request('0\\r\\n\\r\\n')")
 	}
-	bodyTE := string(body[:endChunk+5]) //+5: take into account 0\r\n\r\n as EndChunk return the index of the substring beginning
-	// 0\r\n\r\n = 5  char
-	fmt.Printf(bodyTE)
 
-	if residue && len(body) >= endChunk+6 { //some charcters after end of chunk
-		bodyEnding := string(body[endChunk+5:])
-		fmt.Fprintf(os.Stderr, utils.Purple(bodyEnding))
+	bodyTE = body[:endChunk+5] //+5?: last character is omitted take into account 0\r\n\r\n as EndChunk return the index of the substring beginning
+	// 0\r\n\r\n = 5  char
+
+	if len(body) >= endChunk+6 { //some characters after end of chunk
+		residueB = body[endChunk+5:]
 	}
+	return bodyTE, residueB
 }
 
 //Parse the body according to Content-Length Header
-func FilterWithContentLength(contentLength int, body []byte, residue bool) {
+func FilterWithContentLength(contentLength int, body []byte) (bodyCL []byte, residueB []byte, difference int) {
 	//3 cases: CL = body length, CL > body length, CL < body length
-	difference := contentLength - len(body)
+	difference = contentLength - len(body)
 	switch {
-	case difference > 0: // print body + nb of bytes missing
-		fmt.Println("here")
-		fmt.Printf(string(body))
-		fmt.Fprintln(os.Stderr, utils.Yellow("\nMissing ", difference, " bytes in body"))
-	case difference <= 0: //print body + extra body payload (if there is)
-		// Print request body  as it would be interpreted by server using Content-Length
-		bodyCL := string(body[:contentLength])
-		fmt.Printf(bodyCL)
-		// Print request residue
-		if residue && len(body) >= contentLength+1 {
-			bodyResidue := string(body[contentLength:])
-			fmt.Fprintf(os.Stderr, utils.Purple(bodyResidue))
+	case difference > 0: // body + nb of bytes missing
+		bodyCL = body
+	case difference <= 0: //body + extra body payload (if there is)
+		// request body  as it would be interpreted by server using Content-Length
+		bodyCL = body[:contentLength] //last charactar is ommited
+		// request residue
+		if len(body) >= contentLength+1 {
+			residueB = body[contentLength:]
 		}
 	}
+	return bodyCL, residueB, difference
 }
 
 //ParseURl: parse an url to retreive protocol and address
