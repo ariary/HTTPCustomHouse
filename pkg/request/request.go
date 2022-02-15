@@ -43,6 +43,15 @@ func (request *Request) ChangePath(path string) {
 
 }
 
+//ChangeMethod: Change the method for the HTTP Request (modify first line of the raw request + request obect)
+func (request *Request) ChangeMethod(nMethod string) {
+	request.Method = nMethod
+	commandLineSplitted := strings.Split(request.CommandLine, " ") //(0: medthod, 1:path 2: version)
+	commandLineSplitted[0] = nMethod
+	request.CommandLine = strings.Join(commandLineSplitted, " ")
+
+}
+
 // From net http package (+ withdraw sanitization)
 // AddCookie adds a cookie to the request. Per RFC 6265 section 5.4,
 // AddCookie does not attach more than one Cookie header field. That
