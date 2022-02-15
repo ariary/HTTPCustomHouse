@@ -152,7 +152,7 @@ cat smuggle_response| grep searc -A 1 -m 1 | cut -d ":" -f 1 | cut -d$'\n' -f2
 
 ### IV - Use secret header to reach admin panel
 
-Smuggle a request with the secret header pointing to 127.0.0.1. We includ it in a smuggled request to prevent it from being rewritten by front-end
+Smuggle a request with the secret header pointing to 127.0.0.1. We include it in a smuggled request to prevent it from being rewritten by front-end
 
 ```shell
 POST / HTTP/1.1
