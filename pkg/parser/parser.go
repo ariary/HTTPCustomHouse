@@ -92,10 +92,10 @@ func FilterWithChunkEncoding(body []byte, residue bool) {
 		log.Fatal("Failed to retrieve end of chunks in request('0\\r\\n\\r\\n')")
 	}
 	bodyTE := string(body[:endChunk+5]) //+5: take into account 0\r\n\r\n as EndChunk return the index of the substring beginning
-	// 0\r\n\r\n + 1 = 5  .. Why 1 ?
+	// 0\r\n\r\n = 5  char
 	fmt.Printf(bodyTE)
 
-	if residue && len(body) >= endChunk+5 {
+	if residue && len(body) >= endChunk+6 { //some charcters after end of chunk
 		bodyEnding := string(body[endChunk+5:])
 		fmt.Fprintf(os.Stderr, utils.Purple(bodyEnding))
 	}
@@ -103,27 +103,26 @@ func FilterWithChunkEncoding(body []byte, residue bool) {
 
 //Parse the body according to Content-Length Header
 func FilterWithContentLength(contentLength int, body []byte, residue bool) {
-
-	// 3 cases: CL = body length, CL > body length, CL < body length
+	//3 cases: CL = body length, CL > body length, CL < body length
 	difference := contentLength - len(body)
 	switch {
 	case difference > 0: // print body + nb of bytes missing
+		fmt.Println("here")
 		fmt.Printf(string(body))
 		fmt.Fprintln(os.Stderr, utils.Yellow("\nMissing ", difference, " bytes in body"))
 	case difference <= 0: //print body + extra body payload (if there is)
 		// Print request body  as it would be interpreted by server using Content-Length
-		bodyCL := string(body[:contentLength+1]) // -1? due to the \n beginning the body form (see above)
+		bodyCL := string(body[:contentLength])
 		fmt.Printf(bodyCL)
-
 		// Print request residue
 		if residue && len(body) >= contentLength+1 {
-			bodyResidue := string(body[contentLength+1:])
+			bodyResidue := string(body[contentLength:])
 			fmt.Fprintf(os.Stderr, utils.Purple(bodyResidue))
 		}
 	}
 }
 
-//ParseURl: parse an url ([protocol]://[addr]:[port]) to retreive protocol and address (address contains port)
+//ParseURl: parse an url to retreive protocol and address
 func ParseUrl(url string) (tls bool, addr string) {
 	if !strings.HasPrefix(url, "http") {
 		log.Fatal("Bad url argument want: [protocol]://[addr]:[port]")
@@ -176,7 +175,6 @@ func ParseResponse(reqMethod string, url string, resp string) (response response
 	response.Status = httpResp.StatusCode
 	response.Headers = httpResp.Header
 	response.Body, err = io.ReadAll(httpResp.Body)
-	response.Cookies = httpResp.Cookies()
 
 	return response, err
 }
