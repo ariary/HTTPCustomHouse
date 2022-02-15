@@ -78,7 +78,13 @@ cat [raw_request] | httpoverride -H "Accept:" # or -H "Accept"
 
 **Send a HTTP raw request**:
 ```shell
-httpclient [protocol]:[url]:[port]  # port is falcultative https -> 443, http -> 80
+cat [raw_request] | httpclient [protocol]:[url]:[port]  # port is falcultative https -> 443, http -> 80
+```
+
+**Send request and see response in browser**:
+```shell
+cat [raw_request] | httpclient -B [protocol]:[url]:[port]  # -Bc use cookie for future requests in browser
+# Open browser and visit the link displayed
 ```
 
 ## Install
