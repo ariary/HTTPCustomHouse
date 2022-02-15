@@ -56,6 +56,9 @@ func main() {
 		fmt.Printf("%s: %s\n", h, v[0]) //TODO handle where multiple value are found for a specific header
 	}
 
+	// /!\ bodyB include \r\n to end headers section
+	fmt.Print("\r\n")
+	bodyB = bodyB[2:]
 	if isTE { //TE custom house
 
 		// Get Body with Transfer-Encoding
