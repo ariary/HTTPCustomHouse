@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/ariary/HTTPCustomHouse/pkg/parser"
+	"github.com/ariary/HTTPCustomHouse/pkg/utils"
 )
 
 const usage = `Usage of httpcustomhouse:
@@ -59,12 +60,17 @@ func main() {
 	// /!\ bodyB include \r\n to end headers section
 	fmt.Print("\r\n")
 	bodyB = bodyB[2:]
+
 	if isTE { //TE custom house
 
 		// Get Body with Transfer-Encoding
 		sTransferEncoding := httpHeader.Get("Transfer-encoding")
 		if sTransferEncoding == "chunked" {
-			parser.FilterWithChunkEncoding(bodyB, residue)
+			bodyTE, residueB := parser.FilterWithChunkEncoding(bodyB)
+			fmt.Print(string(bodyTE))
+			if residue {
+				fmt.Fprintf(os.Stderr, utils.Purple(string(residueB)))
+			}
 		} else {
 			fmt.Print(string(bodyB))
 		}
@@ -79,7 +85,14 @@ func main() {
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Failed to convert Content-Length: %s", err)
 			}
-			parser.FilterWithContentLength(contentLength, bodyB, residue)
+
+			bodyCL, residueB, difference := parser.FilterWithContentLength(contentLength, bodyB)
+			fmt.Print(string(bodyCL))
+			if difference > 0 {
+				fmt.Fprintln(os.Stderr, utils.Yellow("\nMissing ", difference, " bytes in body"))
+			} else if residue {
+				fmt.Fprintf(os.Stderr, utils.Purple(string(residueB)))
+			}
 
 		}
 
