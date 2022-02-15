@@ -202,17 +202,16 @@ func Redirect(cfg config.ClientConfig, response response.Response) (redirectResp
 			//Update Host
 			cfg.Request.Headers["Host"] = []string{strings.Split(cfg.AddrPort, ":")[0]}
 		default:
-			cfg.AddrPort += location
+			cfg.Request.ChangePath(location)
 		}
 
-		cfg.Request.Method = "GET"
+		cfg.Request.ChangeMethod("GET")
 		// add cookie if present
 		if cookies := response.Cookies; len(cookies) > 0 {
 			for i := 0; i < len(cookies); i++ {
 				cfg.Request.AddCookie(cookies[i])
 			}
 		}
-
 		redirectResponseText = PerformRequest(cfg)
 	case status > 303 && status < 400:
 		redirectResponseText = PerformRequest(cfg)
