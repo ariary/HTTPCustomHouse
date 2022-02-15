@@ -181,7 +181,7 @@ func ChangeHTMLBase(htmlB []byte, baseUrl string) (nHtml []byte, err error) {
 	}
 }
 
-func Redirect(cfg config.ClientConfig, response response.Response) (redirectResponseText string, err error) {
+func Redirect(cfg *config.ClientConfig, response response.Response) (redirectResponseText string, err error) {
 
 	switch status := response.Status; {
 	case status >= 301 && status <= 303:
@@ -212,9 +212,9 @@ func Redirect(cfg config.ClientConfig, response response.Response) (redirectResp
 				cfg.Request.AddCookie(cookies[i])
 			}
 		}
-		redirectResponseText = PerformRequest(cfg)
+		redirectResponseText = PerformRequest(*cfg)
 	case status > 303 && status < 400:
-		redirectResponseText = PerformRequest(cfg)
+		redirectResponseText = PerformRequest(*cfg)
 	// case status > 303:
 	// 	fmt.Println("nothing")
 	default:
