@@ -3,16 +3,20 @@ package client
 import (
 	"bytes"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"io"
 	"log"
 	"net"
 	"net/http"
 	"net/url"
+	"strconv"
+	"strings"
 
 	"github.com/ariary/HTTPCustomHouse/pkg/config"
 	"github.com/ariary/HTTPCustomHouse/pkg/parser"
 	"github.com/ariary/HTTPCustomHouse/pkg/request"
+	"github.com/ariary/HTTPCustomHouse/pkg/response"
 	"github.com/ariary/HTTPCustomHouse/pkg/utils"
 	"golang.org/x/net/html"
 )
@@ -175,4 +179,49 @@ func ChangeHTMLBase(htmlB []byte, baseUrl string) (nHtml []byte, err error) {
 			nHtml = append(nHtml, tokenizer.Raw()...)
 		}
 	}
+}
+
+func Redirect(cfg config.ClientConfig, response response.Response) (redirectResponseText string, err error) {
+
+	switch status := response.Status; {
+	case status >= 301 && status <= 303:
+		switch location := response.Headers.Get("Location"); {
+		case location == "":
+			err = errors.New("failed to retrieve Location header in 30X response")
+			return "", err
+		case strings.HasPrefix(location, "http"):
+			isEncrypted, addr := parser.ParseUrl(location)
+			if isEncrypted {
+				cfg.Tls = true
+			} else {
+				cfg.Tls = false
+			}
+			cfg.AddrPort = addr
+			path := "/" + strings.Join(strings.Split(location, "/")[4:], "/")
+			cfg.Request.ChangePath(path)
+			//Update Host
+			cfg.Request.Headers["Host"] = []string{strings.Split(cfg.AddrPort, ":")[0]}
+		default:
+			cfg.AddrPort += location
+		}
+
+		cfg.Request.Method = "GET"
+		// add cookie if present
+		if cookies := response.Cookies; len(cookies) > 0 {
+			for i := 0; i < len(cookies); i++ {
+				cfg.Request.AddCookie(cookies[i])
+			}
+		}
+
+		redirectResponseText = PerformRequest(cfg)
+	case status > 303 && status < 400:
+		redirectResponseText = PerformRequest(cfg)
+	// case status > 303:
+	// 	fmt.Println("nothing")
+	default:
+		err = errors.New("status code not treated by redirection:" + strconv.Itoa(status))
+		return "", err
+	}
+
+	return redirectResponseText, err
 }

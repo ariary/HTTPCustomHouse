@@ -104,43 +104,10 @@ func main() {
 				fmt.Println(respText)
 				fmt.Println("********************* REDIRECT:")
 			}
-			var redirectResponseText string
-
-			switch status := response.Status; {
-			case status >= 301 && status <= 303:
-				switch location := response.Headers.Get("Location"); {
-				case location == "":
-					fmt.Println(respText)
-					log.Fatal("Failed to retrieve Location header in 30X response")
-				case strings.HasPrefix(location, "http"):
-					isEncrypted, addr := parser.ParseUrl(location)
-					if isEncrypted {
-						cfg.Tls = true
-					} else {
-						cfg.Tls = false
-					}
-					cfg.AddrPort = addr
-					path := "/" + strings.Join(strings.Split(location, "/")[4:], "/")
-					cfg.Request.ChangePath(path)
-					//Update Host
-					cfg.Request.Headers["Host"] = []string{strings.Split(cfg.AddrPort, ":")[0]}
-				default:
-					cfg.AddrPort += location
-				}
-
-				cfg.Request.Method = "GET"
-				// add cookie if present
-				if cookies := response.Headers.Get("Cookie"); cookies != "" {
-					cfg.Request.Headers.Add("Cookie", cookies)
-				}
-
-				redirectResponseText = client.PerformRequest(cfg)
-			case status > 303 && status < 400:
-				redirectResponseText = client.PerformRequest(cfg)
-			// case status > 303:
-			// 	fmt.Println("nothing")
-			default:
-				redirectResponseText = respText
+			redirectResponseText, err := client.Redirect(cfg, response)
+			if err != nil {
+				fmt.Println(respText)
+				log.Fatal(err)
 			}
 
 			rawRequest = request.GetRawHTTPRequest(cfg.Request)

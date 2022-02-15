@@ -6,4 +6,5 @@ type Response struct {
 	Status  int
 	Headers http.Header
 	Body    []byte
+	Cookies []*http.Cookie
 }
