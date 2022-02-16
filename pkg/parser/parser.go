@@ -170,6 +170,7 @@ func ParseResponse(reqMethod string, url string, resp string) (response response
 	response.Status = httpResp.StatusCode
 	response.Headers = httpResp.Header
 	response.Body, err = io.ReadAll(httpResp.Body)
+	response.Cookies = httpResp.Cookies()
 
 	return response, err
 }
