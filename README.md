@@ -27,10 +27,10 @@ HTTP request smuggling is a technique for interfering with the way a web site pr
 * `curl`, go http client, `ncat`, `openssl s_client` aren't fully satisfying especially when dealing with "malformed http request"
 
 **Real examples:**
-* [Forge `TE.CL` request smuggling attack](./EXAMPLES.md#analyze-tecl-request-treatment)
-* [Forge `CL.TE` request smuggling attack](./EXAMPLES.md#analyze-clte-request-treatment)
-* [Exploit `CL.TE`](./EXAMPLES.md#exploiting-http-request-smuggling-to-reveal-front-end-request-rewriting) [[2](./EXAMPLES.md#exploiting-http-request-smuggling-to-bypass-front-end-security-controls-clte-vulnerability)] [[3](./EXAMPLES.md#exploiting-http-request-smuggling-to-deliver-reflected-xss-clte)]
-* [Exploit `TE.CL`](./EXAMPLES.md#exploiting-http-request-smuggling-to-bypass-front-end-security-controls-tecl-vulnerability)
+* [Forge `TE.CL` request smuggling attack](https://github.com/ariary/HTTPCustomHouse/blob/main/EXAMPLES.md#analyze-tecl-request-treatment)
+* [Forge `CL.TE` request smuggling attack](https://github.com/ariary/HTTPCustomHouse/blob/main/EXAMPLES.md#analyze-clte-request-treatment)
+* [Exploit `CL.TE`](https://github.com/ariary/HTTPCustomHouse/blob/main/EXAMPLES.md#exploiting-http-request-smuggling-to-reveal-front-end-request-rewriting) [[2](https://github.com/ariary/HTTPCustomHouse/blob/main/EXAMPLES.md#exploiting-http-request-smuggling-to-bypass-front-end-security-controls-clte-vulnerability)] [[3](https://github.com/ariary/HTTPCustomHouse/blob/main/EXAMPLES.md#exploiting-http-request-smuggling-to-deliver-reflected-xss-clte)]
+* [Exploit `TE.CL`](https://github.com/ariary/HTTPCustomHouse/blob/main/EXAMPLES.md#exploiting-http-request-smuggling-to-bypass-front-end-security-controls-tecl-vulnerability)
 
 
 ## Usage
