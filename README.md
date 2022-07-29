@@ -117,7 +117,7 @@ We have 3 possibilities:
 
 ## Building HTTP request
 
-As `httpcustomhouse` use raw HTTP request as input you need to be able to construct it. There are several ways:
+As `httpcustomhouse` uses raw HTTP request as input you need to be able to construct it. There are several ways:
 * Intercept request with `burp`, `mitmproxy` and save it to a file
 * Use curl and an HTTP [`echo-server`](https://github.com/ariary/httpecho) to see sent request and save it to a file ***(SUGGESTED)***
 * Take inspiration from the templates present in `samples` directory
