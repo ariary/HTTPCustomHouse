@@ -407,3 +407,11 @@ curl -s -X POST http://localhost:8888/ --data-binary "@payload" -H "Host: $LAB_U
 # Perform the request
 cat smuggle | httpclient https://$LAB_URL
 ```
+
+To help you determine when the request is well-smuggled if the following request return:
+```shell
+$ cat smuggle | httpclient https://$LAB_URL | grep "script"
+            <script src="/resources/labheader/js/labHeader.js"></script>
+                        Back&nbsp;to&nbsp;lab&nbsp;description&nbsp;
+# the next request will trigger the smuggle request
+```
