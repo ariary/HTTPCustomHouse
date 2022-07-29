@@ -10,6 +10,7 @@ type ClientConfig struct {
 	InBrowser           bool
 	InBrowserWithCookie bool
 	Tls                 bool
+	Include             bool
 	AddrPort            string //addr:port
 	Url                 string //protocol://addr:port
 	Request             request.Request

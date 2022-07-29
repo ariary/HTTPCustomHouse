@@ -14,12 +14,13 @@ import (
 	"github.com/ariary/HTTPCustomHouse/pkg/config"
 	"github.com/ariary/HTTPCustomHouse/pkg/parser"
 	"github.com/ariary/HTTPCustomHouse/pkg/request"
-	"github.com/ariary/HTTPCustomHouse/pkg/utils"
+	"github.com/ariary/go-utils/pkg/color"
 )
 
 const usage = `Usage of httpclient: httpclient [url]
 Make http request from raw request. [url] is required and on the form: [protocol]://[addr]:[port]
   -k, --insecure     insecure HTTPS communication
+  -i, --include		 include the HTTP response headers in the output
   -v, --verbose	     display sent request (-d to see special characters)
   -L, --location     follow redirects
   -B, --browser      perform current request in browser (-Bc to add Cookie in further request)
@@ -46,6 +47,9 @@ func main() {
 	flag.BoolVar(&cfg.InBrowser, "browser", false, "Perform current request in browser")
 	flag.BoolVar(&cfg.InBrowser, "B", false, "Perform current request in browser")
 	flag.BoolVar(&cfg.InBrowserWithCookie, "Bc", false, "Perform current request in browser, include cookie for other request")
+
+	flag.BoolVar(&cfg.Include, "include", false, "Include the HTTP response headers in the output")
+	flag.BoolVar(&cfg.Include, "i", false, "Include the HTTP response headers in the output")
 
 	flag.Usage = func() { fmt.Print(usage) }
 	flag.Parse()
@@ -81,15 +85,15 @@ func main() {
 		client.BrowserMode(cfg)
 	} else { // in output
 		if cfg.Verbose {
-			fmt.Println("--------------------- SEND:")
+			fmt.Println(color.MagentaForeground("------------------------ SEND:"))
 			if cfg.Debug {
-				reqDebug := strings.ReplaceAll(string(rawRequest), "\r", utils.Green("\\r"))
-				reqDebug = strings.ReplaceAll(reqDebug, "\n", utils.Green("\\n\n"))
+				reqDebug := strings.ReplaceAll(string(rawRequest), "\r", color.Green("\\r"))
+				reqDebug = strings.ReplaceAll(reqDebug, "\n", color.Green("\\n\n"))
 				fmt.Println(reqDebug)
 			} else {
 				fmt.Println(string(rawRequest)) // raw request ~ request.GetRawRequest(cfg.Request)
 			}
-			fmt.Println("--------------------- RECEIVE:")
+			fmt.Println(color.BlueForeground("--------------------- RECEIVE:"))
 		}
 
 		respText := client.PerformRequest(cfg)
@@ -113,8 +117,8 @@ func main() {
 			if cfg.Verbose {
 				fmt.Println("--------------------- SEND:")
 				if cfg.Debug {
-					reqDebug := strings.ReplaceAll(string(rawRequest), "\r", utils.Green("\\r"))
-					reqDebug = strings.ReplaceAll(reqDebug, "\n", utils.Green("\\n\n"))
+					reqDebug := strings.ReplaceAll(string(rawRequest), "\r", color.Green("\\r"))
+					reqDebug = strings.ReplaceAll(reqDebug, "\n", color.Green("\\n\n"))
 					fmt.Println(reqDebug)
 				} else {
 					fmt.Println(string(rawRequest)) // raw request ~ request.GetRawRequest(cfg.Request)
@@ -124,7 +128,11 @@ func main() {
 			//from now follow only 1 redirect
 			fmt.Println(redirectResponseText)
 		} else {
-			fmt.Println(respText)
+			if cfg.Include {
+				fmt.Println(respText)
+			} else {
+				fmt.Println(string(response.Body))
+			}
 		}
 	}
 }

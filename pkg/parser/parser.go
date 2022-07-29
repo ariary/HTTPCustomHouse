@@ -162,8 +162,6 @@ func ParseResponse(reqMethod string, url string, resp string) (response response
 		return response, err
 	}
 
-	fmt.Printf("%+v", req)
-
 	httpResp, err := http.ReadResponse(r, req)
 	if err != nil {
 		return response, err

@@ -9,7 +9,7 @@ import (
 	"strconv"
 
 	"github.com/ariary/HTTPCustomHouse/pkg/parser"
-	"github.com/ariary/HTTPCustomHouse/pkg/utils"
+	"github.com/ariary/go-utils/pkg/color"
 )
 
 const usage = `Usage of httpcustomhouse:
@@ -69,7 +69,7 @@ func main() {
 			bodyTE, residueB := parser.FilterWithChunkEncoding(bodyB)
 			fmt.Print(string(bodyTE))
 			if residue {
-				fmt.Fprintf(os.Stderr, utils.Purple(string(residueB)))
+				fmt.Fprintf(os.Stderr, color.Magenta(string(residueB)))
 			}
 		} else {
 			fmt.Print(string(bodyB))
@@ -89,9 +89,9 @@ func main() {
 			bodyCL, residueB, difference := parser.FilterWithContentLength(contentLength, bodyB)
 			fmt.Print(string(bodyCL))
 			if difference > 0 {
-				fmt.Fprintln(os.Stderr, utils.Yellow("\nMissing ", difference, " bytes in body"))
+				fmt.Fprintln(os.Stderr, color.Yellow("\nMissing ", difference, " bytes in body"))
 			} else if residue {
-				fmt.Fprintf(os.Stderr, utils.Purple(string(residueB)))
+				fmt.Fprintf(os.Stderr, color.Magenta(string(residueB)))
 			}
 
 		}

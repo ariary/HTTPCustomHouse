@@ -17,7 +17,7 @@ import (
 	"github.com/ariary/HTTPCustomHouse/pkg/parser"
 	"github.com/ariary/HTTPCustomHouse/pkg/request"
 	"github.com/ariary/HTTPCustomHouse/pkg/response"
-	"github.com/ariary/HTTPCustomHouse/pkg/utils"
+	encryption "github.com/ariary/go-utils/pkg/encrypt"
 	"golang.org/x/net/html"
 )
 
@@ -62,7 +62,7 @@ func PerformRequest(cfg config.ClientConfig) (fullResponseText string) {
 func BrowserMode(cfg config.ClientConfig) {
 	port := ":8080"
 	// generate random endpoint
-	endpoint := "/" + utils.GenerateRandom()
+	endpoint := "/" + encryption.GenerateRandom()
 
 	fmt.Println("Visit http://localhost" + port + endpoint)
 	requestHandler := &RequestHandler{Config: cfg}
