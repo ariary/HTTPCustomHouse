@@ -13,10 +13,11 @@ import (
 )
 
 const usage = `Usage of httpcustomhouse:
-  -r, --residues display residues of the request not treated by the custom officer
-  -cl, --Content-Length stop request treatment according to Content-Length header value
-  -te, --Transfer-Encoding stop request treatment according to chunked encoding
-  -h, --help prints help information 
+  -r, --residues              display residues of the request not treated by the custom officer
+  -cl, --Content-Length       stop request treatment according to Content-Length header value
+  -te, --Transfer-Encoding    stop request treatment according to chunked encoding
+  -d, --debug                 display special characters (\r and \n) 
+  -h, --help                  prints help information 
 `
 
 // /!\ request contain \r\n\r\n characters, when editing w/ vscode for example this character are
@@ -35,6 +36,10 @@ func main() {
 	var isTE bool
 	flag.BoolVar(&isTE, "Transfer-Encoding", false, "stop request treatment according to chunked encoding")
 	flag.BoolVar(&isTE, "te", false, "stop request treatment according to chunked encoding")
+	//-d
+	var debug bool
+	flag.BoolVar(&debug, "debug", false, "Display with special character")
+	flag.BoolVar(&debug, "d", false, "Display request with special character")
 	flag.Usage = func() { fmt.Print(usage) }
 	flag.Parse()
 
@@ -54,11 +59,19 @@ func main() {
 
 	// Print header
 	for h, v := range httpHeader {
-		fmt.Printf("%s: %s\n", h, v[0]) //TODO handle where multiple value are found for a specific header
+		headerLine := h + ": " + v[0] + "\n"
+		if debug {
+			headerLine = parser.ReplaceSpecialCharacters([]byte(headerLine))
+		}
+		fmt.Printf(headerLine) //TODO handle where multiple value are found for a specific header
 	}
 
 	// /!\ bodyB include \r\n to end headers section
-	fmt.Print("\r\n")
+	separeHeaderAndBody := "\r\n"
+	if debug {
+		separeHeaderAndBody = parser.ReplaceSpecialCharacters([]byte(separeHeaderAndBody))
+	}
+	fmt.Print(separeHeaderAndBody)
 	bodyB = bodyB[2:]
 
 	if isTE { //TE custom house
@@ -67,19 +80,35 @@ func main() {
 		sTransferEncoding := httpHeader.Get("Transfer-encoding")
 		if sTransferEncoding == "chunked" {
 			bodyTE, residueB := parser.FilterWithChunkEncoding(bodyB)
-			fmt.Print(string(bodyTE))
+			bodyTEStr := string(bodyTE)
+			if debug {
+				bodyTEStr = parser.ReplaceSpecialCharacters(bodyTE)
+			}
+			fmt.Print(bodyTEStr)
 			if residue {
-				fmt.Fprintf(os.Stderr, color.Magenta(string(residueB)))
+				residueStr := string(residueB)
+				if debug {
+					residueStr = parser.ReplaceSpecialCharacters(residueB)
+				}
+				fmt.Fprintf(os.Stderr, color.Magenta(residueStr))
 			}
 		} else {
-			fmt.Print(string(bodyB))
+			bodyStr := string(bodyB)
+			if debug {
+				bodyStr = parser.ReplaceSpecialCharacters(bodyB)
+			}
+			fmt.Print(bodyStr)
 		}
 	} else { //CL custom house
 		// Get Content-Length value
 		sContentLength := httpHeader.Get("Content-Length")
 		if sContentLength == "" {
+			bodyStr := string(bodyB)
+			if debug {
+				bodyStr = parser.ReplaceSpecialCharacters(bodyB)
+			}
 			//fmt.Fprintf(os.Stderr, "Content-Length not found")
-			fmt.Print(string(bodyB)) //Print whole request
+			fmt.Print(bodyStr) //Print whole request
 		} else {
 			contentLength, err := strconv.Atoi(sContentLength)
 			if err != nil {
@@ -87,11 +116,19 @@ func main() {
 			}
 
 			bodyCL, residueB, difference := parser.FilterWithContentLength(contentLength, bodyB)
-			fmt.Print(string(bodyCL))
+			bodyCLStr := string(bodyCL)
+			if debug {
+				bodyCLStr = parser.ReplaceSpecialCharacters(bodyCL)
+			}
+			fmt.Print(bodyCLStr)
 			if difference > 0 {
 				fmt.Fprintln(os.Stderr, color.Yellow("\nMissing ", difference, " bytes in body"))
 			} else if residue {
-				fmt.Fprintf(os.Stderr, color.Magenta(string(residueB)))
+				residueStr := string(residueB)
+				if debug {
+					residueStr = parser.ReplaceSpecialCharacters(residueB)
+				}
+				fmt.Fprintf(os.Stderr, color.Magenta(residueStr))
 			}
 
 		}

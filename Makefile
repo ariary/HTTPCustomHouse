@@ -9,3 +9,6 @@ build.httpoverride:
 
 build.httpclient:
 	@echo "build in ${PWD}";go build -o httpclient cmd/httpclient/main.go
+
+all:
+	@echo "build in ${PWD}";go build -o httpclient cmd/httpclient/main.go;go build -o httpoverride cmd/httpoverride/main.go;go build -o httpcustomhouse cmd/httpcustomhouse/main.go

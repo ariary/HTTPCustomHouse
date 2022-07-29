@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"strings"
 
 	"github.com/ariary/HTTPCustomHouse/pkg/client"
 	"github.com/ariary/HTTPCustomHouse/pkg/config"
@@ -87,8 +86,7 @@ func main() {
 		if cfg.Verbose {
 			fmt.Println(color.MagentaForeground("------------------------ SEND:"))
 			if cfg.Debug {
-				reqDebug := strings.ReplaceAll(string(rawRequest), "\r", color.Green("\\r"))
-				reqDebug = strings.ReplaceAll(reqDebug, "\n", color.Green("\\n\n"))
+				reqDebug := parser.ReplaceSpecialCharacters(rawRequest)
 				fmt.Println(reqDebug)
 			} else {
 				fmt.Println(string(rawRequest)) // raw request ~ request.GetRawRequest(cfg.Request)
@@ -117,8 +115,7 @@ func main() {
 			if cfg.Verbose {
 				fmt.Println("--------------------- SEND:")
 				if cfg.Debug {
-					reqDebug := strings.ReplaceAll(string(rawRequest), "\r", color.Green("\\r"))
-					reqDebug = strings.ReplaceAll(reqDebug, "\n", color.Green("\\n\n"))
+					reqDebug := parser.ReplaceSpecialCharacters(rawRequest)
 					fmt.Println(reqDebug)
 				} else {
 					fmt.Println(string(rawRequest)) // raw request ~ request.GetRawRequest(cfg.Request)

@@ -12,6 +12,7 @@ import (
 
 	"github.com/ariary/HTTPCustomHouse/pkg/request"
 	"github.com/ariary/HTTPCustomHouse/pkg/response"
+	"github.com/ariary/go-utils/pkg/color"
 )
 
 //Parse a request to retrieve headers and body
@@ -174,4 +175,11 @@ func ParseResponse(reqMethod string, url string, resp string) (response response
 	response.Cookies = httpResp.Cookies()
 
 	return response, err
+}
+
+//ReplaceSpecialCharacters: replace special characters in a given string (bytes) to make them visible
+func ReplaceSpecialCharacters(rawWithSpecial []byte) (strWithoutSpecial string) {
+	strWithoutSpecial = strings.ReplaceAll(string(rawWithSpecial), "\r", color.Green("\\r"))
+	strWithoutSpecial = strings.ReplaceAll(strWithoutSpecial, "\n", color.Green("\\n\n"))
+	return strWithoutSpecial
 }
