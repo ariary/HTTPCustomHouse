@@ -156,10 +156,13 @@ func ParseUrl(url string) (tls bool, addr string) {
 //ParseResponse: parse an HTTP response to retrieve the status line, the header field and the body
 func ParseResponse(reqMethod string, url string, resp string) (response response.Response, err error) {
 	r := bufio.NewReader(strings.NewReader(resp))
+	url = strings.Split(url, ":")[0] //bugfix: [url]:[port]
 	req, err := http.NewRequest(reqMethod, url, nil)
 	if err != nil {
 		return response, err
 	}
+
+	fmt.Printf("%+v", req)
 
 	httpResp, err := http.ReadResponse(r, req)
 	if err != nil {
