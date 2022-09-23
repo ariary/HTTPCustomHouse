@@ -35,16 +35,16 @@ func GetRawHTTPRequest(req Request) (rawRequest []byte) {
 	return rawRequest
 }
 
-//ChangePath: Change the path uri with the one provided for the HTTP Request (modify first line of the raw request)
-func (request *Request) ChangePath(path string) {
+//SetPath: Change the path uri with the one provided for the HTTP Request (modify first line of the raw request)
+func (request *Request) SetPath(path string) {
 	commandLineSplitted := strings.Split(request.CommandLine, " ") //(0: medthod, 1:path 2: version)
 	commandLineSplitted[1] = path
 	request.CommandLine = strings.Join(commandLineSplitted, " ")
 
 }
 
-//ChangeMethod: Change the method for the HTTP Request (modify first line of the raw request + request obect)
-func (request *Request) ChangeMethod(nMethod string) {
+//SetMethod: Change the method for the HTTP Request (modify first line of the raw request + request obect)
+func (request *Request) SetMethod(nMethod string) {
 	request.Method = nMethod
 	commandLineSplitted := strings.Split(request.CommandLine, " ") //(0: medthod, 1:path 2: version)
 	commandLineSplitted[0] = nMethod

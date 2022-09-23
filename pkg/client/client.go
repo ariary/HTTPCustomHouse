@@ -198,14 +198,14 @@ func Redirect(cfg *config.ClientConfig, response response.Response) (redirectRes
 			}
 			cfg.AddrPort = addr
 			path := "/" + strings.Join(strings.Split(location, "/")[4:], "/")
-			cfg.Request.ChangePath(path)
+			cfg.Request.SetPath(path)
 			//Update Host
 			cfg.Request.Headers["Host"] = []string{strings.Split(cfg.AddrPort, ":")[0]}
 		default:
-			cfg.Request.ChangePath(location)
+			cfg.Request.SetPath(location)
 		}
 
-		cfg.Request.ChangeMethod("GET")
+		cfg.Request.SetMethod("GET")
 		// add cookie if present
 		if cookies := response.Cookies; len(cookies) > 0 {
 			for i := 0; i < len(cookies); i++ {
